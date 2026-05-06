@@ -1,0 +1,108 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+<BaseLayout title="每日简报 — Walter's Tech Blog" description="AI Agent · 国内科技 · 国际科技每日简报" activeNav="briefing">
+  <section class="container-narrow">
+    <h1 style="font-size: 26px; margin-bottom: 6px; color: var(--text-primary)">📰 每日技术简报</h1>
+    <p style="color: var(--text-tertiary); margin-bottom: 20px;">AI Agent · 国内科技 · 国际科技 — 每日精选，自动采集</p>
+    <div id="topicTabs" style="display:flex; gap:8px; margin-bottom: 16px; flex-wrap:wrap;">
+      <button class="badge" data-topic="ai-agent" style="cursor:pointer;border:none;">🤖 AI Agent</button>
+      <button class="badge" data-topic="china-tech" style="cursor:pointer;border:none;">🇨🇳 国内科技</button>
+      <button class="badge" data-topic="global-tech" style="cursor:pointer;border:none;">🌍 国际科技</button>
+    </div>
+    <div id="dateList" style="display:flex; gap:6px; margin-bottom: 16px; overflow-x:auto; padding-bottom:4px;"></div>
+    <div id="briefingContent" class="post-body" style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--card-bg);">
+      <div style="text-align:center; padding: 40px; color: var(--text-tertiary);">加载中…</div>
+    </div>
+  </section>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
+  <script is:inline>
+    (function () {
+      const REPO = 'WalterHandsome/tech-learning-and-projects';
+      const BRANCH = 'main';
+      const BASE_API = `https://api.github.com/repos/${REPO}/contents/learning-notes/briefings`;
+      const RAW = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/learning-notes/briefings`;
+      let topic = 'ai-agent', date = null;
+      const dateCache = {}, contentCache = {};
+      const tabs = document.getElementById('topicTabs');
+      const dateList = document.getElementById('dateList');
+      const content = document.getElementById('briefingContent');
+
+      async function fetchDates(t) {
+        if (dateCache[t]) return dateCache[t];
+        const now = new Date();
+        const y = now.getFullYear(), m = now.getMonth() + 1;
+        const dates = [];
+        for (let i = m; i >= Math.max(1, m - 2); i--) {
+          const mm = String(i).padStart(2, '0');
+          try {
+            const r = await fetch(`${BASE_API}/${t}/${y}/${mm}`, { headers: { Accept: 'application/vnd.github.v3+json' }});
+            if (!r.ok) continue;
+            const files = await r.json();
+            for (const f of files) {
+              const m2 = f.name.match(/^(\d{4}-\d{2}-\d{2})\.md$/);
+              if (m2) dates.push(m2[1]);
+            }
+          } catch (_) {}
+        }
+        dates.sort((a, b) => b.localeCompare(a));
+        dateCache[t] = dates;
+        return dates;
+      }
+
+      async function fetchContent(t, d) {
+        const k = `${t}/${d}`;
+        if (contentCache[k]) return contentCache[k];
+        const [y, mo] = d.split('-');
+        const r = await fetch(`${RAW}/${t}/${y}/${mo}/${d}.md`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const md = await r.text();
+        contentCache[k] = md;
+        return md;
+      }
+
+      function render(md) {
+        md = md.replace(/<!--[\s\S]*?-->/g, '').replace(/^---[\s\S]*?---\n*/m, '');
+        return window.marked.parse(md, { breaks: true, gfm: true });
+      }
+
+      async function switchTopic(t) {
+        topic = t;
+        content.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-tertiary);">加载中…</div>';
+        const dates = await fetchDates(t);
+        if (!dates.length) {
+          dateList.innerHTML = '';
+          content.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-tertiary);">📭 暂无简报</div>';
+          return;
+        }
+        const d = date && dates.includes(date) ? date : dates[0];
+        date = d;
+        dateList.innerHTML = dates.slice(0, 14).map((x) =>
+          `<button class="badge" data-date="${x}" style="cursor:pointer;border:none;${x === d ? 'background:var(--primary);color:#fff' : ''}">${x.slice(5)}</button>`
+        ).join('');
+        await load(t, d);
+      }
+
+      async function load(t, d) {
+        date = d;
+        try {
+          const md = await fetchContent(t, d);
+          content.innerHTML = render(md);
+        } catch (e) {
+          content.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-tertiary);">😕 加载失败：${e.message}</div>`;
+        }
+      }
+
+      tabs.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-topic]');
+        if (b) { date = null; switchTopic(b.dataset.topic); }
+      });
+      dateList.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-date]');
+        if (b) load(topic, b.dataset.date);
+      });
+
+      switchTopic(topic);
+    })();
+  </script>
+</BaseLayout>

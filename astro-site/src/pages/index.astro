@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const all = await getCollection('blog', ({ data }) => !data.draft);
+const posts = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
+const BASE = import.meta.env.BASE_URL;
+---
+<BaseLayout title="Walter's Tech Blog" activeNav="blog">
+  <section class="container-narrow">
+    <h1 style="font-size: 28px; margin-bottom: 8px; color: var(--text-primary)">⚡ Walter's Tech Blog</h1>
+    <p style="color: var(--text-tertiary); margin-bottom: 24px;">AI Agent · 工程实践 · 系统设计</p>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom: 20px;">
+      <input id="searchInput" type="search" placeholder="搜索文章标题、摘要、标签…" style="flex:1; min-width: 220px; padding: 10px 14px; border:1px solid var(--border-color); border-radius: 10px; background: var(--card-bg); color: var(--text-primary); font-size: 14px;" />
+    </div>
+    <div id="tagFilter" style="margin-bottom: 20px; display:flex; flex-wrap:wrap; gap:8px;">
+      <button class="badge" data-tag="" style="cursor:pointer;border:none;">全部</button>
+      {allTags.map((t) => (<button class="badge" data-tag={t} style="cursor:pointer;border:none;">{t}</button>))}
+    </div>
+    <div id="postList">
+      {posts.map((p) => (
+        <a class="post-card" href={`${BASE}posts/${p.slug}/`} data-title={p.data.title} data-excerpt={p.data.excerpt} data-tags={p.data.tags.join(',')}>
+          <h2>{p.data.title}</h2>
+          <div class="meta">
+            <time datetime={p.data.date.toISOString().slice(0,10)}>{p.data.date.toISOString().slice(0,10)}</time>
+            {' · '}
+            {p.data.tags.map((t) => <span class="badge">{t}</span>)}
+          </div>
+          <p class="excerpt">{p.data.excerpt}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+  <script>
+    (function () {
+      const hash = location.hash.slice(1);
+      if (!hash) return;
+      const target = document.querySelector(`a.post-card[href$="/posts/${hash}/"]`);
+      if (target) {
+        const href = (target as HTMLAnchorElement).href;
+        history.replaceState(null, '', href);
+        location.replace(href);
+      }
+    })();
+    const input = document.getElementById('searchInput') as HTMLInputElement | null;
+    const tagBar = document.getElementById('tagFilter');
+    const cards = Array.from(document.querySelectorAll<HTMLAnchorElement>('#postList .post-card'));
+    let activeTag = '';
+    let query = '';
+    function apply() {
+      const q = query.toLowerCase();
+      for (const c of cards) {
+        const title = c.dataset.title?.toLowerCase() ?? '';
+        const excerpt = c.dataset.excerpt?.toLowerCase() ?? '';
+        const tags = (c.dataset.tags ?? '').split(',');
+        const matchQ = !q || title.includes(q) || excerpt.includes(q) || tags.some((t) => t.toLowerCase().includes(q));
+        const matchT = !activeTag || tags.includes(activeTag);
+        c.style.display = matchQ && matchT ? '' : 'none';
+      }
+    }
+    input?.addEventListener('input', () => { query = input.value.trim(); apply(); });
+    tagBar?.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('button[data-tag]') as HTMLButtonElement | null;
+      if (!btn) return;
+      activeTag = btn.dataset.tag ?? '';
+      apply();
+    });
+  </script>
+</BaseLayout>

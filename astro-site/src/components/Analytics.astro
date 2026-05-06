@@ -1,0 +1,15 @@
+---
+// 与原站点完全一致：51.la + 不蒜子，异步加载不阻塞首屏
+---
+<script is:inline>
+  window.addEventListener('load', function () {
+    var s = document.createElement('script');
+    s.src = '//sdk.51.la/js-sdk-pro.min.js';
+    s.charset = 'UTF-8';
+    s.onload = function () {
+      LA.init({ id: '3PeZ4JAmjD4FHOcx', ck: '3PeZ4JAmjD4FHOcx', autoTrack: true, hashMode: true, screenRecord: true });
+    };
+    document.head.appendChild(s);
+  });
+</script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>

@@ -1,0 +1,79 @@
+<div id="readingProgress"></div>
+<style>
+  #readingProgress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0;
+    background: var(--primary); z-index: 101;
+    transition: width 0.1s ease;
+  }
+  .post-toc {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 0 0 28px;
+    font-size: 14px;
+  }
+  .post-toc .toc-title { font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .post-toc a { display: block; color: var(--text-secondary); padding: 3px 0; }
+  .post-toc a:hover { color: var(--primary); }
+  .code-copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    color: var(--text-secondary); font-size: 12px;
+    padding: 3px 10px; border-radius: 6px; cursor: pointer;
+    opacity: 0; transition: opacity 0.15s ease;
+  }
+  .post-body pre { position: relative; }
+  .post-body pre:hover .code-copy-btn { opacity: 1; }
+  .code-copy-btn.copied { color: var(--primary); border-color: var(--primary); }
+</style>
+<script>
+  const bar = document.getElementById('readingProgress');
+  if (bar) {
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      bar.style.width = max > 0 ? Math.min(100, (window.scrollY / max) * 100) + '%' : '0';
+    });
+  }
+  const body = document.querySelector('.post-body');
+  if (body) {
+    const hs = body.querySelectorAll('h2');
+    if (hs.length >= 2) {
+      const nav = document.createElement('nav');
+      nav.className = 'post-toc';
+      nav.setAttribute('aria-label', '文章目录');
+      nav.innerHTML = '<div class="toc-title">📑 目录</div>' +
+        Array.from(hs).map((h, i) => {
+          if (!h.id) h.id = 'h-' + i;
+          return `<a href="#${h.id}">${h.textContent}</a>`;
+        }).join('');
+      body.insertBefore(nav, body.firstChild);
+      nav.querySelectorAll('a').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = a.getAttribute('href')?.slice(1);
+          if (id) document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+    }
+    body.querySelectorAll('pre').forEach((pre) => {
+      if (pre.querySelector('.code-copy-btn')) return;
+      const btn = document.createElement('button');
+      btn.className = 'code-copy-btn';
+      btn.textContent = '复制';
+      btn.setAttribute('aria-label', '复制代码');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const code = pre.querySelector('code');
+        const text = code ? code.textContent ?? '' : pre.textContent ?? '';
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = '已复制 ✓';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+        });
+      });
+      pre.appendChild(btn);
+    });
+  }
+</script>

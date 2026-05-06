@@ -1,0 +1,87 @@
+---
+import '@/styles/global.css';
+import Analytics from '@/components/Analytics.astro';
+import BackToTop from '@/components/BackToTop.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  activeNav?: 'blog' | 'briefing';
+}
+
+const { title, description = "Walter's Tech Blog — AI Agent 与工程实践", activeNav = 'blog' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const BASE = import.meta.env.BASE_URL;
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title="RSS" href={`${BASE}rss.xml`} />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <title>{title}</title>
+    <script is:inline>
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme', 'dark');
+    </script>
+    <Analytics />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳转到主内容</a>
+    <nav class="navbar" aria-label="主导航">
+      <div class="navbar-inner">
+        <a class="navbar-brand" href={BASE}>⚡ Walter's Tech Blog</a>
+        <ul class="navbar-links">
+          <li><a href={BASE} class={activeNav === 'blog' ? 'active' : ''}>博客</a></li>
+          <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
+          <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
+        </ul>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="menu-toggle" id="menuToggle" aria-label="打开导航菜单" aria-expanded="false">☰</button>
+          <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌙</button>
+        </div>
+      </div>
+      <ul class="mobile-nav" id="mobileNav">
+        <li><a href={BASE}>博客</a></li>
+        <li><a href={`${BASE}briefing/`}>简报</a></li>
+        <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+    </nav>
+    <main id="main"><slot /></main>
+    <footer>
+      <p>© {new Date().getFullYear()} Walter's Tech Blog · Powered by Astro</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--text-tertiary)">
+        👀 本页访问 <span id="busuanzi_value_page_pv">--</span> 次 · 全站访客 <span id="busuanzi_value_site_uv">--</span> 人
+      </p>
+    </footer>
+    <BackToTop />
+    <script>
+      const toggle = document.getElementById('themeToggle');
+      const root = document.documentElement;
+      toggle?.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', cur);
+        localStorage.setItem('theme', cur);
+        if (toggle) toggle.textContent = cur === 'dark' ? '☀️' : '🌙';
+      });
+      if (toggle) toggle.textContent = root.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+      const menuBtn = document.getElementById('menuToggle');
+      const mobileNav = document.getElementById('mobileNav');
+      menuBtn?.addEventListener('click', () => {
+        const open = mobileNav?.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', String(!!open));
+      });
+    </script>
+  </body>
+</html>

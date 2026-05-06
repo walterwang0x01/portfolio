@@ -1,0 +1,22 @@
+<button id="backToTop" aria-label="回到顶部" title="回到顶部">↑</button>
+<style>
+  #backToTop {
+    position: fixed; right: 24px; bottom: 32px;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    border: none; font-size: 18px; cursor: pointer;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 99;
+  }
+  #backToTop.visible { opacity: 1; pointer-events: auto; }
+  #backToTop:hover { transform: translateY(-2px); }
+</style>
+<script>
+  const btn = document.getElementById('backToTop');
+  btn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  window.addEventListener('scroll', () => {
+    btn?.classList.toggle('visible', window.scrollY > 400);
+  });
+</script>

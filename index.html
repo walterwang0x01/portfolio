@@ -501,6 +501,161 @@
     // ================================================================
     const posts = [
         {
+            id: "computer-use-and-browser-agent",
+            title: "Computer Use 与浏览器 Agent：让 AI 真正操控你的电脑",
+            date: "2026-05-06",
+            tags: ["Computer Use", "AI Agent", "浏览器自动化"],
+            excerpt: "文本聊天只是 AI Agent 的第一形态。当 Anthropic Computer Use、OpenAI Operator、Browser Use 让 Agent 能看屏幕、点按钮、填表单时，真正的「数字员工」才刚刚起步。本文拆解三种技术范式的架构差异、工程挑战与安全边界。",
+            body: `
+                <p>你让 Agent 订一张机票，它回你一段"请访问携程搜索 xxx 航班"。这不是自动化，这只是个会说话的搜索引擎。</p>
+                <p>真正的数字员工应该是这样：告诉它"帮我订下周五去上海的下午航班，商务座，报销抬头用公司",然后 Agent <strong>自己打开浏览器、登录、搜索、比价、填表、提交、拿到确认号</strong>——就像你招了个远程实习生。</p>
+                <p>2024 年 10 月 Anthropic 发布 Computer Use，2025 年 1 月 OpenAI 推出 Operator，到 2026 年各大厂商都把"操控 GUI"当作 Agent 的核心战场。这不是另一个花哨的 Demo 方向，而是<strong>把 LLM 从"对话接口"升级为"执行接口"的关键一跃</strong>。本文拆解三种主流技术范式、核心工程挑战，以及在你自己项目里能不能用的判断依据。</p>
+
+                <h2>三种技术范式：操控电脑的三条路</h2>
+                <p>让 Agent 操控 GUI，本质上是回答两个问题：<strong>它怎么"看见"界面？它怎么"动手"操作？</strong>围绕这两个问题，业界分化出三条技术路线。</p>
+
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                  三种 Computer Use 范式                      │
+├──────────────┬──────────────────┬──────────────────────────┤
+│   范式 A     │      范式 B       │         范式 C           │
+│  API 驱动    │   视觉 + 坐标     │     DOM 直接操控         │
+├──────────────┼──────────────────┼──────────────────────────┤
+│ Zapier/n8n   │ Anthropic        │ browser-use / Playwright │
+│ 工具调用      │ Computer Use     │ + LLM 代理               │
+│ Function     │ OpenAI Operator  │                          │
+│ Calling      │                  │                          │
+├──────────────┼──────────────────┼──────────────────────────┤
+│ 能力窄       │ 全场景（任何 GUI）│ 仅浏览器，但便宜且稳定    │
+│ 快且稳定      │ 慢且贵，但通用    │ 快，成本低               │
+│ 需要 API 支持 │ 只要能截屏即可    │ 需要浏览器环境            │
+└──────────────┴──────────────────┴──────────────────────────┘</code></pre>
+
+                <h3>范式 A：API 驱动——最稳，也最受限</h3>
+                <p>传统工作流工具的思路：给每个应用包一层 API，让 LLM 通过 Function Calling 调用。好处是稳定、快速、可预测；代价是你只能操作那些<strong>主动暴露 API 的系统</strong>。现实中大量 SaaS 没有 API，或者 API 覆盖不到核心功能（比如企业内网的老系统、第三方供应商的报价单），这条路就走不通。</p>
+
+                <h3>范式 B：视觉 + 坐标——最通用，也最贵</h3>
+                <p>Anthropic Computer Use 开创的路线：让 Agent 像人一样<strong>通过截屏"看"界面，通过鼠标键盘坐标"动手"</strong>。模型输入是一张 PNG，输出是 <code>{action: "click", x: 432, y: 218}</code> 这类指令。</p>
+
+<pre><code># Anthropic Computer Use 的典型调用（简化）
+from anthropic import Anthropic
+
+client = Anthropic()
+response = client.beta.messages.create(
+    model="claude-opus-4-5",
+    max_tokens=4096,
+    tools=[{
+        "type": "computer_20250124",
+        "name": "computer",
+        "display_width_px": 1920,
+        "display_height_px": 1080,
+    }],
+    messages=[{
+        "role": "user",
+        "content": "打开浏览器，在 GitHub 搜索 browser-use 项目并 star"
+    }]
+)
+
+# 模型会生成一系列 action：
+# { action: "screenshot" }           → 先看当前屏幕
+# { action: "key", text: "cmd+space"} → 打开 Spotlight
+# { action: "type", text: "Chrome" }  → 输入
+# { action: "key", text: "Return" }   → 回车
+# { action: "screenshot" }           → 再看屏幕
+# { action: "left_click", coordinate: [432, 218] } → 点击地址栏
+# ...
+# 宿主进程负责执行每个 action 并返回新截图</code></pre>
+
+                <p>这种方式理论上能操控任何 GUI——桌面应用、浏览器、甚至虚拟机里的老软件。但三个代价必须正视：</p>
+                <ul>
+                    <li><strong>慢</strong>：每一步都要"截图 → LLM 推理 → 执行 → 再截图"，一个订机票任务要 30-60 秒，对比 API 方案的 2 秒差了一个数量级</li>
+                    <li><strong>贵</strong>：每次推理都带一张 1080p 图片作为输入，一次复杂任务可能消耗 50k-200k tokens，成本是纯文本 Agent 的 10 倍以上</li>
+                    <li><strong>脆弱</strong>：UI 改版、弹窗、加载延迟都会导致坐标错位。需要配合 <code>wait + retry + verification</code> 机制</li>
+                </ul>
+
+                <h3>范式 C：DOM 直接操控——浏览器场景的最优解</h3>
+                <p>如果任务只在浏览器里完成（这已经覆盖 80% 的业务场景），范式 B 就有点"杀鸡用牛刀"。<a href="https://github.com/browser-use/browser-use" target="_blank" rel="noopener noreferrer">browser-use</a> 这类开源方案走了另一条路：<strong>把 DOM 树提取出来、标注可交互元素、让 LLM 输出"点击第 3 个按钮"这样的结构化指令</strong>，底层用 Playwright 执行。</p>
+
+<pre><code># browser-use 的调用方式（极简）
+from browser_use import Agent
+from langchain_openai import ChatOpenAI
+
+agent = Agent(
+    task="去 Hacker News 找今天排名第一的文章，总结前三条评论",
+    llm=ChatOpenAI(model="gpt-4o"),
+)
+result = await agent.run()
+
+# 内部工作流：
+# 1. Playwright 打开页面
+# 2. 抽取 DOM，标注所有 button/a/input 为 [1] [2] [3]...
+# 3. LLM 输入：页面文本 + 可交互元素列表 + 任务
+# 4. LLM 输出："click_element(index=1)"
+# 5. 执行、观察、迭代</code></pre>
+
+                <p>相比截屏方案，DOM 直接操控的优势是<strong>输入 token 少一个数量级、定位精确、执行快</strong>。劣势是只能用在浏览器里，遇到 Canvas 画布、iframe 跨域、严重依赖视觉的页面（如地图、设计工具）就退化了。</p>
+
+                <h2>真正难的不是"能跑"，是"跑得稳"</h2>
+                <p>看完上面的代码你可能觉得"好像挺简单"，但把一个 Demo 变成生产系统，要翻越的工程墙远比想象的高。</p>
+
+                <h3>挑战 1：Action 空间的设计</h3>
+                <p>给 LLM 什么动作原语，决定了 Agent 能力的天花板。只给 <code>click(x, y)</code> 和 <code>type(text)</code> 当然能跑，但遇到滚动、拖拽、右键菜单、键盘快捷键时就抓瞎。Anthropic Computer Use 定义了 12 种动作，OpenAI Operator 更细化到 20+ 种。<strong>Action 空间不是越多越好</strong>——动作多了，LLM 选错的概率也会上升。业界的共识是：基础的 10 个动作覆盖 90% 场景，复杂交互用组合动作实现。</p>
+
+                <h3>挑战 2：不确定性与 recovery 机制</h3>
+                <p>GUI 操作是<strong>非幂等</strong>的——同一个指令执行两次可能产生完全不同结果（比如点两次"提交"可能下两个订单）。生产级 Agent 必须内置：</p>
+                <ul>
+                    <li><strong>观察-行动分离</strong>：每次行动前先截图/提 DOM 确认状态</li>
+                    <li><strong>断点恢复</strong>：任务中断后能从最后一个确认状态继续，而不是从头再来</li>
+                    <li><strong>幂等键</strong>：对关键操作（支付、发送邮件）引入客户端唯一 ID，防止重试时重复执行</li>
+                    <li><strong>人工升级通道</strong>：当连续 N 次行动都无法推进时，主动请求人类介入，而不是死循环</li>
+                </ul>
+
+                <h3>挑战 3：安全——远比普通 Agent 严重</h3>
+                <p>一个能操控你电脑的 Agent，它的<strong>爆炸半径就是你的整台机器</strong>。Prompt 注入攻击在 Computer Use 场景下尤其致命——恶意网页可以显示"请立刻删除 Documents 目录"，如果 Agent 把网页文本当作指令执行，灾难就发生了。</p>
+
+<pre><code>生产部署必备的三层隔离：
+┌─────────────────────────────────────────┐
+│  Layer 1: 操作白名单                     │
+│  - 不允许执行系统命令                     │
+│  - 不允许访问特定目录                     │
+│  - 高危操作（删除/支付）必须人工确认       │
+├─────────────────────────────────────────┤
+│  Layer 2: 沙箱隔离                       │
+│  - Agent 运行在 Docker / Firecracker VM  │
+│  - 用完即销毁，不污染主机                 │
+│  - 网络出口通过代理审计                   │
+├─────────────────────────────────────────┤
+│  Layer 3: 可观测 + 可中断                │
+│  - 所有 action 录屏 + 审计日志           │
+│  - 用户可随时一键暂停                     │
+│  - 异常行为触发告警（如访问陌生域名）      │
+└─────────────────────────────────────────┘</code></pre>
+
+                <p>Anthropic 官方在推出 Computer Use 时就明确警告"目前仍不适合在生产环境对着真实数据运行"。E2B、Docker Desktop 的 Sandbox 模式、Chrome 的 Headless 隔离环境，都是当前主流的安全实践。</p>
+
+                <h2>现阶段适合做什么、不适合做什么</h2>
+                <p>2026 年的 Computer Use 还远没到"可以替代人类员工"的地步。综合成熟度、成本、ROI 看，下面这些场景已经能稳定落地：</p>
+                <ul>
+                    <li><strong>结构化 Web 任务</strong>：批量填表、数据搬运、竞品价格监控——browser-use 路线性价比最高</li>
+                    <li><strong>QA 自动化</strong>：让 Agent 描述式编写 E2E 测试，省掉大量 Selenium 脚本维护</li>
+                    <li><strong>RPA 替换</strong>：传统 RPA 脚本一改 UI 就崩，视觉 Agent 对 UI 变动有更强鲁棒性</li>
+                    <li><strong>个人助理类</strong>：帮用户在多个 SaaS 之间搬运信息、跨系统对账</li>
+                </ul>
+
+                <p>暂时不适合的场景：高频任务（成本算不过账）、金融交易（风险不可控）、涉及大量文件系统操作的任务（安全边界不清）。</p>
+
+                <h2>选型建议：先问自己三个问题</h2>
+                <ol>
+                    <li><strong>任务是不是只在浏览器里？</strong> 是 → browser-use / Playwright + LLM 路线，成本和稳定性最均衡</li>
+                    <li><strong>需不需要跨应用（浏览器 + 桌面软件）？</strong> 是 → Anthropic Computer Use 或 OpenAI Operator，目前只有视觉方案能通吃</li>
+                    <li><strong>目标系统有没有开放 API？</strong> 有 → 先用 Function Calling + MCP 接入。永远优先走 API，视觉只是 fallback</li>
+                </ol>
+
+                <blockquote>Computer Use 不是来取代 Function Calling 的，而是把 Agent 的能力边界从"API 覆盖的世界"扩展到"人类能操作的整个数字世界"。真正的生产级方案往往是三者混合：<strong>能走 API 就走 API，浏览器场景走 DOM，其它兜底用视觉</strong>。</blockquote>
+
+                <p>相关笔记可以在我的 <a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener noreferrer">GitHub 仓库</a> 找到完整的浏览器与 Agent 生态笔记（6 篇），包括 Computer Use、Agent Skills、AgentOS 的架构对比与代码示例。</p>
+            `
+        },
+        {
             id: "mcp-protocol-deep-dive",
             title: "MCP 协议深度解析：AI Agent 连接万物的通信标准",
             date: "2026-05-05",
@@ -4502,112 +4657,6 @@ Agentic AI（有工具 + 自主性）：
             `
         },
         {
-            id: "mcp-protocol-deep-dive",
-            title: "MCP 协议深度解析：AI Agent 的「USB 接口」",
-            date: "2026-04-18",
-            tags: ["MCP", "Agent 工具"],
-            excerpt: "MCP（Model Context Protocol）正在成为 AI Agent 连接外部工具的事实标准。这篇文章从协议设计、核心架构到实战开发，带你彻底搞懂 MCP。",
-            body: `
-                <p>如果说 AI Agent 是大脑，那工具就是它的手脚。而 <strong>MCP（Model Context Protocol）</strong> 就是连接大脑和手脚的神经系统——一个由 Anthropic 在 2024 年底提出的开放协议，定义了 LLM 应用如何与外部数据源和工具进行标准化通信。</p>
-                <p>到 2026 年，MCP 已经被 Cursor、Kiro、Claude Desktop、Windsurf 等主流 AI 工具采用，生态中有数千个 MCP Server 可用。理解 MCP，是做 AI Agent 开发的必修课。</p>
-
-                <h2>为什么需要 MCP？</h2>
-                <p>在 MCP 出现之前，每个 AI 应用要接入外部工具，都需要写定制化的集成代码。假设你有 M 个 AI 应用和 N 个工具，就需要 M×N 个集成——这就是经典的 <strong>M×N 问题</strong>。</p>
-                <p>MCP 的解法很简单：定义一个标准协议，让所有 AI 应用（MCP Client）和所有工具（MCP Server）都遵循同一套接口。这样 M×N 变成了 M+N。</p>
-<pre><code># MCP 之前：每个应用单独对接每个工具
-Cursor ──定制代码──▶ GitHub API
-Cursor ──定制代码──▶ Slack API
-Kiro   ──定制代码──▶ GitHub API
-Kiro   ──定制代码──▶ Slack API
-# 4 个集成
-
-# MCP 之后：标准协议连接
-Cursor ──MCP──▶ GitHub MCP Server
-Kiro   ──MCP──▶ GitHub MCP Server
-Cursor ──MCP──▶ Slack MCP Server
-Kiro   ──MCP──▶ Slack MCP Server
-# 2 个 Server，所有 Client 复用</code></pre>
-
-                <h2>MCP 的核心架构</h2>
-                <p>MCP 采用经典的 <strong>Client-Server 架构</strong>，通过 JSON-RPC 2.0 通信：</p>
-                <ul>
-                    <li><strong>MCP Host</strong>：宿主应用（如 Kiro、Claude Desktop），负责管理 Client 实例</li>
-                    <li><strong>MCP Client</strong>：协议客户端，与 Server 建立一对一连接</li>
-                    <li><strong>MCP Server</strong>：提供具体能力的服务端，暴露工具、资源和提示模板</li>
-                </ul>
-                <p>Server 可以提供三种核心能力：</p>
-                <ol>
-                    <li><strong>Tools（工具）</strong>：可执行的操作，如"发送邮件"、"查询数据库"、"创建 PR"</li>
-                    <li><strong>Resources（资源）</strong>：可读取的数据，如文件内容、数据库记录</li>
-                    <li><strong>Prompts（提示模板）</strong>：预定义的交互模板，引导用户完成特定任务</li>
-                </ol>
-
-                <h2>动手写一个 MCP Server</h2>
-                <p>用 Python 的 FastMCP 框架，几十行代码就能写一个 MCP Server：</p>
-<pre><code>from mcp.server.fastmcp import FastMCP
-
-# 创建 MCP Server
-mcp = FastMCP("my-tools")
-
-@mcp.tool()
-def search_notes(query: str, limit: int = 5) -> str:
-    """搜索技术笔记库中的相关内容"""
-    # 这里接入你的 RAG 系统或数据库
-    results = vector_db.search(query, top_k=limit)
-    return format_results(results)
-
-@mcp.tool()
-def get_trending_topics() -> str:
-    """获取今日 AI 领域热门话题"""
-    topics = fetch_hacker_news_ai()
-    return json.dumps(topics, ensure_ascii=False)
-
-@mcp.resource("notes://recent")
-def get_recent_notes() -> str:
-    """获取最近更新的笔记列表"""
-    return load_recent_notes()
-
-if __name__ == "__main__":
-    mcp.run()</code></pre>
-                <p>配置到 Kiro 或 Claude Desktop 中只需要在 <code>mcp.json</code> 里加几行：</p>
-<pre><code>{
-  "mcpServers": {
-    "my-tools": {
-      "command": "python",
-      "args": ["path/to/server.py"]
-    }
-  }
-}</code></pre>
-
-                <h2>MCP 的传输层</h2>
-                <p>MCP 支持两种传输方式：</p>
-                <ul>
-                    <li><strong>stdio</strong>：通过标准输入输出通信，适合本地工具。Client 启动 Server 进程，通过 stdin/stdout 交换 JSON-RPC 消息</li>
-                    <li><strong>Streamable HTTP</strong>：通过 HTTP + SSE 通信，适合远程服务。支持无状态和有状态两种模式</li>
-                </ul>
-                <p>本地开发用 stdio 最方便，生产部署用 HTTP。大多数 MCP Server 都同时支持两种模式。</p>
-
-                <h2>MCP 生态现状</h2>
-                <p>截至 2026 年 4 月，MCP 生态已经相当成熟：</p>
-                <ul>
-                    <li><strong>官方 SDK</strong>：Python、TypeScript、Java、Kotlin、C# 均有官方支持</li>
-                    <li><strong>Server 数量</strong>：GitHub MCP Registry 上有数千个社区贡献的 Server</li>
-                    <li><strong>主流工具支持</strong>：Kiro、Cursor、Claude Desktop、Windsurf、Cline 等都原生支持 MCP</li>
-                    <li><strong>企业采用</strong>：Cloudflare、Stripe、Shopify 等都提供了官方 MCP Server</li>
-                </ul>
-
-                <h2>安全注意事项</h2>
-                <p>MCP 的开放性也带来了安全风险，生产环境中需要注意：</p>
-                <ul>
-                    <li><strong>工具投毒</strong>：恶意 MCP Server 可能在工具描述中注入 Prompt，诱导 LLM 执行危险操作</li>
-                    <li><strong>权限控制</strong>：确保 MCP Server 只能访问它需要的资源，遵循最小权限原则</li>
-                    <li><strong>输入验证</strong>：对 LLM 传给工具的参数做严格校验，防止注入攻击</li>
-                    <li><strong>审计日志</strong>：记录所有工具调用，便于事后追溯</li>
-                </ul>
-                <blockquote>MCP 正在成为 AI Agent 生态的基础设施层。掌握 MCP，就掌握了 Agent 与真实世界交互的钥匙。更多 MCP 相关的学习笔记，可以参考我的 <a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener noreferrer">GitHub 仓库</a> 中 Agent 协议章节的 6 篇深度笔记。</blockquote>
-            `
-        },
-        {
             id: "ai-agent-framework-comparison",
             title: "AI Agent 框架选型：LangGraph vs CrewAI vs OpenAI SDK 实战对比",
             date: "2026-04-18",
@@ -4825,163 +4874,6 @@ def multi_query_retrieve(question: str) -> list:
                 </ul>
                 <p>推荐使用 RAGAS 框架做自动化评估，它提供了上述指标的标准化计算方法。</p>
                 <blockquote>RAG 看似简单，但要做好需要在分块、检索、重排序、生成每个环节都精心调优。我的 <a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener noreferrer">GitHub 仓库</a> 中有 4 篇 RAG 进阶笔记，从基础架构到 GraphRAG 都有覆盖。</blockquote>
-            `
-        },
-        {
-            id: "context-engineering",
-            title: "Context Engineering：比 Prompt Engineering 更重要的事",
-            date: "2026-04-18",
-            tags: ["Context Engineering", "LLM"],
-            excerpt: "当 AI Agent 从 Demo 走向生产，真正决定成败的不是你怎么写 Prompt，而是你怎么设计整个上下文系统。深入解析 Context Engineering 的核心理念与实战方法。",
-            body: `
-                <p>2025 年中，Shopify CEO Tobi Lütke 和前 OpenAI 研究员 Andrej Karpathy 几乎同时提出了一个观点：<strong>Context Engineering 比 Prompt Engineering 更重要</strong>。随后 Simon Willison 在博客中正式为这个概念定调。到了 2026 年，Context Engineering 已经成为 AI Agent 开发领域最核心的工程能力之一。</p>
-                <p>如果你还在纠结怎么写出更好的 Prompt，那你可能抓错了重点。这篇文章带你理解 Context Engineering 到底是什么，为什么它比 Prompt Engineering 更关键，以及如何在实际项目中落地。</p>
-
-                <h2>什么是 Context Engineering？</h2>
-                <p>一句话定义：<strong>Context Engineering 是设计和管理 LLM 在每次推理时所接收的完整信息载荷的工程实践。</strong></p>
-                <p>这个"信息载荷"不只是用户输入的那句话，它包括：</p>
-                <ul>
-                    <li><strong>系统提示词（System Prompt）</strong>：角色定义、行为约束、输出格式</li>
-                    <li><strong>对话历史（Conversation History）</strong>：多轮交互的上下文</li>
-                    <li><strong>检索结果（Retrieved Context）</strong>：RAG 系统返回的相关文档</li>
-                    <li><strong>工具定义（Tool Definitions）</strong>：可调用的 Function Calling 接口</li>
-                    <li><strong>记忆（Memory）</strong>：短期工作记忆和长期知识记忆</li>
-                    <li><strong>策略与规则（Policies）</strong>：业务规则、安全约束、合规要求</li>
-                </ul>
-                <blockquote>Prompt Engineering 问的是"我该对模型说什么"，Context Engineering 问的是"模型在回答之前，应该看到什么信息、什么时候看到、以什么格式看到"。这是一个系统级的工程问题。</blockquote>
-
-                <h2>为什么 Prompt Engineering 不够了？</h2>
-                <p>Prompt Engineering 在单轮对话场景下确实有效。但当你构建一个生产级 AI Agent 时，你会发现：</p>
-                <ol>
-                    <li><strong>上下文窗口是稀缺资源</strong>：即使模型支持 128K 甚至更长的上下文，塞入过多无关信息会导致"大海捞针"问题，模型在关键信息上的注意力被稀释</li>
-                    <li><strong>Agent 需要跨步骤推理</strong>：一个 Agent 可能需要执行 10+ 步操作，每一步需要的上下文完全不同。静态 Prompt 无法应对这种动态需求</li>
-                    <li><strong>多源信息需要编排</strong>：RAG 检索结果、工具返回值、用户偏好、历史记忆——这些信息来自不同系统，需要统一编排后才能送入模型</li>
-                    <li><strong>安全和合规要求</strong>：生产环境中，你需要控制模型能看到什么、不能看到什么，这不是一个 Prompt 能解决的</li>
-                </ol>
-
-                <h2>Context Engineering 的四大支柱</h2>
-                <h3>1. 信息选择（What）</h3>
-                <p>核心问题：模型需要看到哪些信息？</p>
-                <p>这涉及到 RAG 检索策略、记忆召回机制、工具选择逻辑。关键原则是<strong>最小充分集</strong>——找到让模型产生正确输出的最小高信号 token 集合。</p>
-<pre><code># 反面示例：把所有文档都塞进去
-context = system_prompt + all_documents + all_history + all_tools
-
-# 正面示例：精准选择相关信息
-relevant_docs = rag_retrieve(query, top_k=3, threshold=0.8)
-recent_history = conversation[-5:]  # 只保留最近 5 轮
-active_tools = select_tools(intent)  # 根据意图选择工具
-context = system_prompt + relevant_docs + recent_history + active_tools</code></pre>
-
-                <h3>2. 时序控制（When）</h3>
-                <p>核心问题：信息在什么时候注入上下文？</p>
-                <p>Agent 的执行是多步骤的，不同阶段需要不同的上下文。比如：</p>
-                <ul>
-                    <li><strong>意图识别阶段</strong>：需要用户画像 + 历史行为</li>
-                    <li><strong>工具调用阶段</strong>：需要工具 schema + 参数约束</li>
-                    <li><strong>结果生成阶段</strong>：需要工具返回值 + 输出格式要求</li>
-                </ul>
-                <p>好的 Context Engineering 会在每个步骤动态组装上下文，而不是一开始就把所有信息都塞进去。</p>
-
-                <h3>3. 格式设计（How）</h3>
-                <p>核心问题：信息以什么格式呈现给模型？</p>
-                <p>同样的信息，不同的组织方式会显著影响模型的推理质量：</p>
-<pre><code># 差的格式：纯文本堆砌
-"用户叫张三，VIP 等级 3，上次购买了手机，投诉过物流慢..."
-
-# 好的格式：结构化呈现
-"""
-## 用户档案
-- 姓名：张三
-- VIP 等级：3
-- 最近订单：iPhone 16（2026-04-10）
-- 历史工单：物流时效投诉（已解决）
-
-## 当前任务
-处理用户关于订单退款的咨询
-
-## 约束
-- 退款金额超过 500 元需要主管审批
-- 必须在 3 分钟内给出初步回复
-"""</code></pre>
-
-                <h3>4. 容量管理（How Much）</h3>
-                <p>核心问题：如何在有限的上下文窗口内最大化信息价值？</p>
-                <p>这是最容易被忽视但最关键的部分。实用策略包括：</p>
-                <ul>
-                    <li><strong>摘要压缩</strong>：对长对话历史做渐进式摘要</li>
-                    <li><strong>优先级排序</strong>：关键信息放在上下文的开头和结尾（利用模型的注意力分布特点）</li>
-                    <li><strong>动态裁剪</strong>：根据当前任务复杂度动态调整上下文长度</li>
-                    <li><strong>分层缓存</strong>：高频信息缓存在 System Prompt，低频信息按需检索</li>
-                </ul>
-
-                <h2>实战：一个客服 Agent 的 Context Engineering</h2>
-                <p>以一个电商客服 Agent 为例，看看 Context Engineering 在实际项目中是怎么落地的：</p>
-<pre><code>def build_context(user_id: str, message: str) -> list:
-    """为每次 LLM 调用动态构建上下文"""
-    context = []
-
-    # 第一层：系统角色与规则（固定）
-    context.append({
-        "role": "system",
-        "content": load_system_prompt("customer_service_v3")
-    })
-
-    # 第二层：用户画像（从数据库实时获取）
-    user_profile = get_user_profile(user_id)
-    context.append({
-        "role": "system",
-        "content": format_user_profile(user_profile)
-    })
-
-    # 第三层：相关知识（RAG 检索）
-    docs = rag_search(message, collection="faq", top_k=3)
-    if docs:
-        context.append({
-            "role": "system",
-            "content": format_retrieved_docs(docs)
-        })
-
-    # 第四层：对话历史（带摘要的滑动窗口）
-    history = get_conversation_history(user_id, limit=10)
-    if len(history) > 6:
-        summary = summarize_history(history[:-4])
-        context.append({"role": "system", "content": f"对话摘要：{summary}"})
-        context.extend(history[-4:])
-    else:
-        context.extend(history)
-
-    # 第五层：当前用户消息
-    context.append({"role": "user", "content": message})
-
-    return context</code></pre>
-                <p>这段代码体现了 Context Engineering 的核心思想：<strong>分层构建、动态组装、按需检索</strong>。每一层都有明确的职责，整体上下文是根据当前请求实时生成的。</p>
-
-                <h2>Context Engineering 与 Agent 框架</h2>
-                <p>主流 Agent 框架对 Context Engineering 的支持程度各不相同：</p>
-                <ul>
-                    <li><strong>LangGraph</strong>：通过 State 机制天然支持上下文管理，每个节点可以读写共享状态，非常适合复杂的上下文编排</li>
-                    <li><strong>CrewAI</strong>：通过 Agent 的 backstory 和 memory 配置管理上下文，更偏向声明式</li>
-                    <li><strong>OpenAI Agents SDK</strong>：通过 instructions 和 handoff 机制管理上下文传递</li>
-                </ul>
-                <p>无论用哪个框架，Context Engineering 的核心原则是一样的：<strong>让模型在每一步都看到恰好足够的信息，不多也不少。</strong></p>
-
-                <h2>常见误区与最佳实践</h2>
-                <p><strong>误区一：上下文越长越好。</strong>实际上，过长的上下文会导致模型"迷路"。研究表明，当上下文超过一定长度后，模型对中间部分信息的关注度会显著下降。</p>
-                <p><strong>误区二：一次性构建上下文。</strong>生产级 Agent 的上下文应该是动态的、分步骤构建的。每个推理步骤的上下文都应该针对当前任务重新组装。</p>
-                <p><strong>误区三：忽视上下文的可观测性。</strong>你需要能够追踪和审计每次 LLM 调用的完整上下文，这对调试和优化至关重要。</p>
-                <p>最佳实践总结：</p>
-                <ol>
-                    <li>建立上下文构建的标准化流水线，而不是在代码里到处拼接字符串</li>
-                    <li>对上下文做版本管理，像管理代码一样管理你的 System Prompt 和上下文模板</li>
-                    <li>实施上下文的 A/B 测试，量化不同上下文策略对输出质量的影响</li>
-                    <li>监控上下文的 token 使用量和成本，建立预算机制</li>
-                    <li>在上下文中加入"元信息"，告诉模型哪些信息是高置信度的、哪些是推测性的</li>
-                </ol>
-
-                <h2>写在最后</h2>
-                <p>Context Engineering 不是一个全新的概念，它是 Prompt Engineering 的自然演进。当我们从"写一个好 Prompt"升级到"构建一个好的 AI 系统"时，Context Engineering 就是那个连接 LLM 能力和业务需求的桥梁。</p>
-                <p>如果你正在构建 AI Agent，建议从今天开始，把"上下文设计"作为架构设计的核心环节，而不是事后补丁。这会让你的 Agent 在可靠性、可维护性和可扩展性上都上一个台阶。</p>
-                <blockquote>更多 AI Agent 相关的学习笔记和实战项目，可以参考我的 <a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener noreferrer">GitHub 仓库</a>，里面有 99 篇体系化的 AI Agent 学习笔记。</blockquote>
             `
         }
     ];

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kiro 编码实战 — 从 Vibe Coding 到 Spec-Driven</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth}
+body{font-family:'Noto Sans SC',system-ui,sans-serif;background:#0a0e1a;color:#e2e8f0;overflow-x:hidden;line-height:1.6}
+code,pre,.mono{font-family:'JetBrains Mono',monospace}
+:root{--bg:#0a0e1a;--card:#1a2035;--blue:#38bdf8;--orange:#f59e0b;--green:#34d399;--red:#f87171;--purple:#a78bfa;--border:rgba(255,255,255,0.06);--border-hover:rgba(255,255,255,0.15);--text:#e2e8f0;--text-dim:#94a3b8;--code-bg:#0d1117}
+.slide{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:clamp(2rem,5vw,4rem) clamp(1.5rem,8vw,6rem);position:relative;overflow:hidden}
+.slide--grid{background:linear-gradient(rgba(56,189,248,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.03) 1px,transparent 1px),#0a0e1a;background-size:60px 60px}
+.slide--radial{background:radial-gradient(ellipse at 50% 30%,rgba(56,189,248,0.08) 0%,transparent 60%),#0a0e1a}
+.slide--radial-purple{background:radial-gradient(ellipse at 50% 30%,rgba(167,139,250,0.08) 0%,transparent 60%),#0a0e1a}
+.slide--radial-orange{background:radial-gradient(ellipse at 50% 30%,rgba(245,158,11,0.08) 0%,transparent 60%),#0a0e1a}
+.slide--radial-green{background:radial-gradient(ellipse at 50% 30%,rgba(52,211,153,0.08) 0%,transparent 60%),#0a0e1a}
+.slide--radial-red{background:radial-gradient(ellipse at 50% 30%,rgba(248,113,113,0.08) 0%,transparent 60%),#0a0e1a}
+.slide-number{position:absolute;bottom:clamp(1rem,2vw,1.5rem);right:clamp(1.5rem,3vw,2.5rem);font-family:'JetBrains Mono',monospace;font-size:clamp(0.7rem,1vw,0.85rem);color:rgba(148,163,184,0.3);letter-spacing:0.05em}
+.slide-content{max-width:1200px;width:100%}
+.tag{display:inline-block;padding:0.3em 1em;border-radius:999px;font-size:clamp(0.7rem,1.2vw,0.85rem);font-weight:500;letter-spacing:0.05em;margin-bottom:clamp(0.8rem,2vw,1.2rem);background:rgba(56,189,248,0.12);color:var(--blue);border:1px solid rgba(56,189,248,0.2)}
+.tag--red{background:rgba(248,113,113,0.12);color:var(--red);border-color:rgba(248,113,113,0.2)}
+.tag--green{background:rgba(52,211,153,0.12);color:var(--green);border-color:rgba(52,211,153,0.2)}
+.tag--purple{background:rgba(167,139,250,0.12);color:var(--purple);border-color:rgba(167,139,250,0.2)}
+.tag--orange{background:rgba(245,158,11,0.12);color:var(--orange);border-color:rgba(245,158,11,0.2)}
+.section-title{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:clamp(0.5rem,1vw,0.8rem)}
+.section-desc{font-size:clamp(0.9rem,1.5vw,1.1rem);color:var(--text-dim);margin-bottom:clamp(1.5rem,3vw,2.5rem);max-width:800px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:clamp(1.2rem,2.5vw,1.8rem);transition:transform 0.3s ease,border-color 0.3s ease,box-shadow 0.3s ease}
+.card:hover{transform:translateY(-4px);border-color:var(--border-hover);box-shadow:0 8px 30px rgba(0,0,0,0.3)}
+.card-icon{font-size:clamp(1.5rem,2.5vw,2rem);margin-bottom:0.6rem}
+.card-title{font-size:clamp(0.95rem,1.5vw,1.1rem);font-weight:700;margin-bottom:0.4rem;color:#fff}
+.card-text{font-size:clamp(0.8rem,1.2vw,0.92rem);color:var(--text-dim);line-height:1.6}
+.grid-2x2{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(0.8rem,2vw,1.2rem);width:100%}
+.grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(0.6rem,1.5vw,1rem);width:100%}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(0.8rem,2vw,1.2rem);width:100%}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(0.8rem,2vw,1.5rem);width:100%}
+.bottom-note{margin-top:clamp(1.5rem,3vw,2.5rem);font-size:clamp(0.85rem,1.3vw,1rem);color:var(--text-dim);text-align:center;padding:0.8em 1.5em;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border)}
+.bottom-note--highlight{background:rgba(56,189,248,0.08);border-color:rgba(56,189,248,0.15);color:var(--blue);font-weight:500}
+.flow{display:flex;align-items:center;justify-content:center;gap:clamp(0.5rem,1.5vw,1rem);flex-wrap:wrap;margin:clamp(1.5rem,3vw,2.5rem) 0}
+.flow-step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:clamp(1rem,2vw,1.5rem) clamp(1.2rem,2.5vw,1.8rem);text-align:center;flex:1;min-width:160px;max-width:260px;transition:transform 0.3s ease,border-color 0.3s ease}
+.flow-step:hover{transform:translateY(-3px);border-color:var(--border-hover)}
+.flow-step-label{font-size:clamp(0.65rem,1vw,0.75rem);color:var(--blue);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem}
+.flow-step-icon{font-size:clamp(1.3rem,2.5vw,1.8rem);margin-bottom:0.4rem}
+.flow-step-text{font-size:clamp(0.8rem,1.2vw,0.92rem);color:var(--text-dim)}
+.flow-arrow{font-size:clamp(1rem,2vw,1.5rem);color:rgba(56,189,248,0.4);flex-shrink:0}
+.code-block{background:var(--code-bg);border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden}
+.code-header{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1rem;background:rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.06);font-family:'JetBrains Mono',monospace;font-size:clamp(0.7rem,1vw,0.8rem);color:var(--text-dim)}
+.code-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.code-dot--red{background:#ff5f57}.code-dot--yellow{background:#febc2e}.code-dot--green{background:#28c840}
+.code-body{padding:clamp(0.8rem,1.5vw,1.2rem);font-family:'JetBrains Mono',monospace;font-size:clamp(0.68rem,0.95vw,0.8rem);line-height:1.7;overflow-x:auto;color:#c9d1d9}
+.code-comment{color:#8b949e}.code-key{color:#79c0ff}.code-string{color:#a5d6ff}.code-value{color:#7ee787}.code-keyword{color:#ff7b72}
+.table-wrap{width:100%;overflow-x:auto;margin:clamp(1rem,2vw,1.5rem) 0}
+table{width:100%;border-collapse:collapse;font-size:clamp(0.78rem,1.1vw,0.9rem)}
+th,td{padding:clamp(0.6rem,1.2vw,1rem) clamp(0.8rem,1.5vw,1.2rem);text-align:left;border-bottom:1px solid var(--border)}
+th{font-weight:700;color:#fff;background:rgba(255,255,255,0.03)}
+td{color:var(--text-dim)}
+.col-highlight{background:rgba(56,189,248,0.06);color:var(--blue);font-weight:500}
+th.col-highlight{background:rgba(56,189,248,0.12);color:var(--blue)}
+.cover-title{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1.15;margin-bottom:clamp(0.5rem,1vw,0.8rem)}
+.cover-gradient{background:linear-gradient(135deg,#38bdf8 0%,#a78bfa 50%,#f59e0b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cover-sub{font-size:clamp(1rem,2vw,1.4rem);color:var(--text-dim);font-weight:300;margin-bottom:clamp(2rem,4vw,3rem)}
+.cover-meta{font-size:clamp(0.85rem,1.2vw,1rem);color:var(--text-dim);margin-bottom:clamp(2rem,4vw,3rem);display:flex;gap:2rem;flex-wrap:wrap}
+.scroll-hint{font-size:clamp(0.8rem,1.1vw,0.9rem);color:rgba(148,163,184,0.5);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:0.5;transform:translateY(0)}50%{opacity:1;transform:translateY(5px)}}
+.nav-dots{position:fixed;right:clamp(0.8rem,1.5vw,1.5rem);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:100}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(148,163,184,0.25);cursor:pointer;transition:all 0.3s ease;border:none;padding:0}
+.nav-dot:hover{background:rgba(148,163,184,0.5);transform:scale(1.3)}
+.nav-dot.active{background:var(--blue);box-shadow:0 0 8px rgba(56,189,248,0.5);transform:scale(1.3)}
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-up.delay-1{transition-delay:0.1s}.fade-up.delay-2{transition-delay:0.2s}.fade-up.delay-3{transition-delay:0.3s}.fade-up.delay-4{transition-delay:0.4s}.fade-up.delay-5{transition-delay:0.5s}
+.bullet-list{list-style:none;padding:0}
+.bullet-list li{position:relative;padding-left:1.5em;margin-bottom:0.6em;font-size:clamp(0.85rem,1.3vw,1rem);color:var(--text-dim)}
+.bullet-list li::before{content:'→';position:absolute;left:0;color:var(--blue);font-weight:700}
+.card--top-green{border-top:3px solid var(--green)}.card--top-red{border-top:3px solid var(--red)}
+.card--left-red{border-left:3px solid var(--red)}.card--left-green{border-left:3px solid var(--green)}.card--left-purple{border-left:3px solid var(--purple)}
+.card--gradient-blue{background:linear-gradient(135deg,rgba(56,189,248,0.12),rgba(56,189,248,0.03));border-color:rgba(56,189,248,0.2)}
+.card--gradient-purple{background:linear-gradient(135deg,rgba(167,139,250,0.12),rgba(167,139,250,0.03));border-color:rgba(167,139,250,0.2)}
+.card--gradient-orange{background:linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.03));border-color:rgba(245,158,11,0.2)}
+.quote{font-size:clamp(1rem,1.8vw,1.3rem);color:var(--text);text-align:center;margin:clamp(1.5rem,3vw,2.5rem) 0;padding:1.2em 2em;border-left:3px solid var(--blue);background:rgba(56,189,248,0.05);border-radius:0 8px 8px 0;font-weight:400;line-height:1.8}
+@media(max-width:900px){.grid-5{grid-template-columns:repeat(3,1fr)}.grid-2x2,.grid-2,.grid-3{grid-template-columns:1fr}.flow{flex-direction:column}.flow-arrow{transform:rotate(90deg)}table{font-size:0.78rem}}
+@media(max-width:600px){.grid-5{grid-template-columns:repeat(2,1fr)}.cover-meta{flex-direction:column;gap:0.5rem}.nav-dots{right:0.5rem}}
+</style>
+</head>
+<body>
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- ===== SLIDE 1: 封面 ===== -->
+<section class="slide slide--grid" id="slide-1">
+  <div class="slide-content" style="text-align:center">
+    <div class="fade-up"><span class="tag">实战经验分享</span></div>
+    <div class="fade-up delay-1">
+      <h1 class="cover-title">Kiro 编码实战</h1>
+      <h1 class="cover-title cover-gradient">从 Vibe Coding 到 Spec-Driven</h1>
+    </div>
+    <div class="fade-up delay-2"><p class="cover-sub">两个月深度使用 Kiro 的团队实践与踩坑经验</p></div>
+    <div class="fade-up delay-3">
+      <div class="cover-meta" style="justify-content:center"><span>📅 2025 年 4 月</span><span>👤 Walter</span></div>
+    </div>
+    <div class="fade-up delay-4"><p class="scroll-hint">↓ 滚动或按方向键翻页</p></div>
+  </div>
+  <span class="slide-number">01 / 14</span>
+</section>
+
+<!-- ===== SLIDE 2: Vibe Coding 的困境 ===== -->
+<section class="slide slide--radial-red" id="slide-2">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag tag--red">问题</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">Vibe Coding 的困境</h2></div>
+    <div class="grid-2x2 fade-up delay-2">
+      <div class="card"><div class="card-icon">⚡</div><div class="card-title">快速但不可控</div><div class="card-text">AI 生成代码很快，但每次结果不一样，代码风格混乱</div></div>
+      <div class="card"><div class="card-icon">🔄</div><div class="card-title">原型 ≠ 生产</div><div class="card-text">Demo 跑得通，但缺少异常处理、安全校验、日志规范</div></div>
+      <div class="card"><div class="card-icon">🧠</div><div class="card-title">上下文丢失</div><div class="card-text">每次对话都要重复说明项目规范、技术栈、架构约定</div></div>
+      <div class="card"><div class="card-icon">📋</div><div class="card-title">无迹可循</div><div class="card-text">需求、设计决策、实现步骤全在聊天记录里，无法追溯</div></div>
+    </div>
+    <div class="fade-up delay-3"><div class="bottom-note">核心问题：AI 编码缺少<strong style="color:var(--red)">结构</strong>和<strong style="color:var(--red)">纪律</strong></div></div>
+  </div>
+  <span class="slide-number">02 / 14</span>
+</section>
+
+<!-- ===== SLIDE 3: Kiro 是什么 ===== -->
+<section class="slide slide--radial-green" id="slide-3">
+  <div class="slide-content" style="text-align:center">
+    <div class="fade-up"><span class="tag tag--green">解决方案</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">Kiro — Spec-Driven 的 AI IDE</h2></div>
+    <div class="fade-up delay-2"><p class="section-desc" style="margin-left:auto;margin-right:auto">AWS 出品，基于 VS Code，由 Claude 驱动。不是更快的代码补全，而是<strong style="color:#fff">结构化的 AI 开发工作流</strong>。</p></div>
+    <div class="flow fade-up delay-3">
+      <div class="flow-step"><div class="flow-step-label">Step 1</div><div class="flow-step-icon">💬</div><div class="card-title">自然语言</div><div class="flow-step-text">描述你想做什么</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-label">Step 2</div><div class="flow-step-icon">📋</div><div class="card-title">结构化规格</div><div class="flow-step-text">需求 → 设计 → 任务</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-label">Step 3</div><div class="flow-step-icon">🔨</div><div class="card-title">可追溯实现</div><div class="flow-step-text">逐步执行、逐步验证</div></div>
+    </div>
+    <div class="fade-up delay-4"><div class="bottom-note">意图、规则、决策都版本化在仓库里</div></div>
+  </div>
+  <span class="slide-number">03 / 14</span>
+</section>
+
+<!-- ===== SLIDE 4: 五大核心能力 ===== -->
+<section class="slide slide--grid" id="slide-4">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag">核心能力</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">五大核心能力</h2></div>
+    <div class="grid-5 fade-up delay-2">
+      <div class="card" style="text-align:center"><div class="card-icon">🧭</div><div class="card-title">Steering</div><div class="card-text">持久化的项目规范，AI 自动遵守</div></div>
+      <div class="card" style="text-align:center"><div class="card-icon">📐</div><div class="card-title">Specs</div><div class="card-text">需求→设计→任务的三阶段规格</div></div>
+      <div class="card" style="text-align:center"><div class="card-icon">⚙️</div><div class="card-title">Hooks</div><div class="card-text">事件驱动的自动化工作流</div></div>
+      <div class="card" style="text-align:center"><div class="card-icon">🔌</div><div class="card-title">MCP</div><div class="card-text">连接外部工具和 API</div></div>
+      <div class="card" style="text-align:center"><div class="card-icon">🎯</div><div class="card-title">Skills</div><div class="card-text">可复用的指令包</div></div>
+    </div>
+    <div class="fade-up delay-3"><div class="bottom-note">让 AI 编码从"随机对话"变成"可重复的工程实践"</div></div>
+  </div>
+  <span class="slide-number">04 / 14</span>
+</section>
+
+<!-- ===== SLIDE 5: 多层配置体系 ===== -->
+<section class="slide slide--radial" id="slide-5">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag tag--green">配置体系</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">全局 + 项目级的多层配置</h2></div>
+    <div class="fade-up delay-2"><p class="section-desc">Kiro 的配置分为全局（<code style="color:var(--blue);background:rgba(56,189,248,0.1);padding:0.15em 0.4em;border-radius:4px">~/.kiro/</code>）和项目级（<code style="color:var(--blue);background:rgba(56,189,248,0.1);padding:0.15em 0.4em;border-radius:4px">.kiro/</code>），全局配置跨项目生效，项目级配置针对特定仓库。</p></div>
+    <div class="grid-3 fade-up delay-3">
+      <div class="card" style="border-top:3px solid var(--blue)">
+        <div class="card-title" style="color:var(--blue);margin-bottom:0.8rem">🌐 全局 Steering</div>
+        <div class="card-text"><code>~/.kiro/steering/</code><br><br>
+          <strong style="color:#fff">language-chinese.md</strong><br>所有回复必须中文<br><br>
+          <strong style="color:#fff">work-methodology.md</strong><br>先想再写 / 最小必要 / 精准改动</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--purple)">
+        <div class="card-title" style="color:var(--purple);margin-bottom:0.8rem">🔌 全局 MCP & Powers</div>
+        <div class="card-text"><code>~/.kiro/settings/mcp.json</code><br><br>
+          <strong style="color:#fff">Notion MCP</strong> — 连接笔记系统<br><br>
+          <strong style="color:#fff">30 个 Powers</strong><br>AWS / Stripe / Terraform / Figma / Datadog 等</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--orange)">
+        <div class="card-title" style="color:var(--orange);margin-bottom:0.8rem">🎯 全局 Skills</div>
+        <div class="card-text"><code>~/.kiro/skills/</code><br><br>
+          <strong style="color:#fff">飞书系列 20+</strong><br>文档/日历/审批/IM 等<br><br>
+          <strong style="color:#fff">通用 Skills</strong><br>代码简化 / 调试 / 增量实现 / 技术图表</div>
+      </div>
+    </div>
+    <div class="fade-up delay-4"><div class="bottom-note">全局配置 = 个人工作习惯 &nbsp;|&nbsp; 项目配置 = 团队协作规范 &nbsp;→&nbsp; 两层叠加，互不冲突</div></div>
+  </div>
+  <span class="slide-number">05 / 14</span>
+</section>
+
+<!-- ===== SLIDE 6: Steering 实战 ===== -->
+<section class="slide slide--grid" id="slide-6">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag">Steering 实战</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">把团队规范写进仓库</h2></div>
+    <div class="fade-up delay-2"><p class="section-desc">Steering 文件放在 <code style="color:var(--blue);background:rgba(56,189,248,0.1);padding:0.15em 0.4em;border-radius:4px">.kiro/steering/</code> 目录下，AI 每次对话自动加载</p></div>
+    <div class="grid-2 fade-up delay-3">
+      <div class="code-block">
+        <div class="code-header"><span class="code-dot code-dot--red"></span><span class="code-dot code-dot--yellow"></span><span class="code-dot code-dot--green"></span><span style="margin-left:0.5rem">project.md</span></div>
+        <div class="code-body"><span class="code-comment"># 项目描述</span>
+<span class="code-key">名称</span>: 支付网关服务
+<span class="code-key">技术栈</span>: <span class="code-value">Python / FastAPI / Vue3</span>
+<span class="code-key">架构</span>: <span class="code-value">分层架构 (Router → Service → Repo)</span>
+
+<span class="code-comment"># 关键约定</span>
+- 所有 API 返回统一 Response 格式
+- 数据库操作必须在 Repository 层
+- 环境变量通过 Settings 类管理</div>
+      </div>
+      <div class="code-block">
+        <div class="code-header"><span class="code-dot code-dot--red"></span><span class="code-dot code-dot--yellow"></span><span class="code-dot code-dot--green"></span><span style="margin-left:0.5rem">code-general.md</span></div>
+        <div class="code-body"><span class="code-comment"># 编码规范</span>
+<span class="code-keyword">## 核心原则</span>
+- <span class="code-value">最小必要改动</span>，不加没要求的功能
+- 先对齐现有约定，再动手写
+- 产出必须是<span class="code-value">可交付代码</span>
+- 单函数 <span class="code-string">≤ 60 行</span>
+
+<span class="code-keyword">## 禁止事项</span>
+- 不"顺手改进"旁边的代码
+- 不臆造不存在的字段和 API</div>
+      </div>
+    </div>
+    <div class="fade-up delay-4"><div class="bottom-note">我们项目有 <strong style="color:var(--blue)">9 个 steering 文件</strong>（项目级）+ 全局 2 个，覆盖 Python / 前端 / 数据库 / 测试 / 重构</div></div>
+  </div>
+  <span class="slide-number">06 / 14</span>
+</section>
+
+<!-- ===== SLIDE 7: Spec 实战 ===== -->
+<section class="slide slide--radial-purple" id="slide-7">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag tag--purple">Spec 实战</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">需求 → 设计 → 任务：三阶段规格</h2></div>
+    <div class="fade-up delay-2"><p class="section-desc">以银联消费撤销与退款功能为例</p></div>
+    <div class="flow fade-up delay-2">
+      <div class="flow-step" style="border-color:rgba(167,139,250,0.3)"><div class="flow-step-label" style="color:var(--purple)">Phase 1</div><div class="card-title">Requirements</div><div class="flow-step-text">用户故事 + 验收标准</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(167,139,250,0.3)"><div class="flow-step-label" style="color:var(--purple)">Phase 2</div><div class="card-title">Design</div><div class="flow-step-text">技术方案 + 接口设计</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(167,139,250,0.3)"><div class="flow-step-label" style="color:var(--purple)">Phase 3</div><div class="card-title">Tasks</div><div class="flow-step-text">可执行的离散任务</div></div>
+    </div>
+    <div class="fade-up delay-3">
+      <div class="code-block" style="max-width:800px;margin:0 auto">
+        <div class="code-header"><span class="code-dot code-dot--red"></span><span class="code-dot code-dot--yellow"></span><span class="code-dot code-dot--green"></span><span style="margin-left:0.5rem">requirements.md — 需求 2</span></div>
+        <div class="code-body"><span class="code-keyword">## 需求 2：撤销优先、退款降级策略</span>
+
+<span class="code-comment">### 用户故事</span>
+作为支付运营人员，我希望系统自动判断
+是否可以撤销，不可撤销时降级为退款。
+
+<span class="code-comment">### 验收标准</span>
+<span class="code-value">AC-1</span>: <span class="code-key">WHEN</span> 原交易在当日 <span class="code-key">THEN</span> 优先发起撤销
+<span class="code-value">AC-2</span>: <span class="code-key">IF</span> 撤销失败/超时 <span class="code-key">THEN</span> 自动降级为退款
+<span class="code-value">AC-3</span>: <span class="code-key">WHEN</span> 原交易跨日 <span class="code-key">THEN</span> 直接走退款流程
+<span class="code-value">AC-4</span>: <span class="code-key">IF</span> 退款也失败 <span class="code-key">THEN</span> 记录异常并通知人工</div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-number">07 / 14</span>
+</section>
+
+<!-- ===== SLIDE 8: Spec 的价值 ===== -->
+<section class="slide slide--grid" id="slide-8">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag tag--purple">Spec 价值</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">Spec 带来的价值</h2></div>
+    <div class="grid-2x2 fade-up delay-2">
+      <div class="card"><div class="card-icon">📝</div><div class="card-title">自动生成文档</div><div class="card-text">需求文档、设计文档不再是负担</div></div>
+      <div class="card"><div class="card-icon">🔍</div><div class="card-title">可追溯的决策</div><div class="card-text">为什么选这个方案？设计文档里有记录</div></div>
+      <div class="card"><div class="card-icon">🎯</div><div class="card-title">任务可拆分</div><div class="card-text">复杂功能被拆成离散任务，可逐步执行验证</div></div>
+      <div class="card"><div class="card-icon">🐛</div><div class="card-title">Bug 也能 Spec</div><div class="card-text">bugfix.md 记录根因分析和修复方案</div></div>
+    </div>
+    <div class="fade-up delay-3"><div class="bottom-note">我们项目已有 <strong style="color:var(--purple)">9 个 Spec</strong></div></div>
+  </div>
+  <span class="slide-number">08 / 14</span>
+</section>
+
+<!-- ===== SLIDE 9: Hooks 实战 ===== -->
+<section class="slide slide--radial-orange" id="slide-9">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag tag--orange">Hooks 实战</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">自动化的安全护栏与代码审查</h2></div>
+    <div class="grid-3 fade-up delay-2">
+      <div class="card card--left-red">
+        <div class="card-icon">🛡️</div><div class="card-title">安全护栏</div>
+        <div class="card-text" style="margin-bottom:0.8rem"><code style="font-size:0.75em;color:var(--orange)">preToolUse → shell</code></div>
+        <div class="card-text">检查 <code>rm -rf</code> / <code>git push --force</code> / <code>DROP TABLE</code> / 明文密码<br><br><span style="color:var(--red);font-weight:700">危险操作 → BLOCKED</span></div>
+      </div>
+      <div class="card card--left-green">
+        <div class="card-icon">✅</div><div class="card-title">完成审查</div>
+        <div class="card-text" style="margin-bottom:0.8rem"><code style="font-size:0.75em;color:var(--orange)">agentStop</code></div>
+        <div class="card-text">自动审查逻辑错误 / 硬编码凭证 / 僵尸 import / 分层违规<br><br><span style="color:var(--green);font-weight:700">有问题 → 直接修复</span></div>
+      </div>
+      <div class="card card--left-purple">
+        <div class="card-icon">🔄</div><div class="card-title">自检进化</div>
+        <div class="card-text" style="margin-bottom:0.8rem"><code style="font-size:0.75em;color:var(--orange)">userTriggered</code></div>
+        <div class="card-text">联网搜索最新安全漏洞和最佳实践，对比当前配置<br><br><span style="color:var(--purple);font-weight:700">输出改进建议</span></div>
+      </div>
+    </div>
+    <div class="fade-up delay-3"><div class="bottom-note">Hooks = 把 Code Review 的经验编码成<strong style="color:var(--orange)">自动化规则</strong></div></div>
+  </div>
+  <span class="slide-number">09 / 14</span>
+</section>
+
+<!-- ===== SLIDE 10: 两种工作模式 ===== -->
+<section class="slide slide--radial" id="slide-10">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag">工作模式</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">两种工作模式</h2></div>
+    <div class="table-wrap fade-up delay-2">
+      <table>
+        <thead><tr><th style="width:22%">维度</th><th style="width:39%">⚡ Vibe Mode</th><th style="width:39%">📐 Spec Mode</th></tr></thead>
+        <tbody>
+          <tr><td style="color:#fff;font-weight:600">适用场景</td><td>快速探索、原型验证</td><td>复杂功能、生产级开发</td></tr>
+          <tr><td style="color:#fff;font-weight:600">产出物</td><td>代码改动</td><td>需求 + 设计 + 任务 + 代码</td></tr>
+          <tr><td style="color:#fff;font-weight:600">可重复性</td><td>低</td><td>高</td></tr>
+          <tr><td style="color:#fff;font-weight:600">团队协作</td><td>个人为主</td><td>可 review、可分工</td></tr>
+          <tr><td style="color:#fff;font-weight:600">典型用例</td><td>"解释这段代码"</td><td>"实现银联退款流程"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="fade-up delay-3"><div class="bottom-note bottom-note--highlight">💡 小事 Vibe，大事 Spec</div></div>
+  </div>
+  <span class="slide-number">10 / 14</span>
+</section>
+
+<!-- ===== SLIDE 11: 横向对比 ===== -->
+<section class="slide slide--grid" id="slide-11">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag">横向对比</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">Kiro vs Cursor vs Copilot</h2></div>
+    <div class="table-wrap fade-up delay-2">
+      <table>
+        <thead><tr><th style="width:22%">维度</th><th class="col-highlight" style="width:26%">🧭 Kiro</th><th style="width:26%">⚡ Cursor</th><th style="width:26%">🤖 Copilot</th></tr></thead>
+        <tbody>
+          <tr><td style="color:#fff;font-weight:600">核心理念</td><td class="col-highlight">Spec-Driven</td><td>对话驱动</td><td>补全驱动</td></tr>
+          <tr><td style="color:#fff;font-weight:600">规格文档</td><td class="col-highlight">✅ 内置三阶段</td><td>❌</td><td>❌</td></tr>
+          <tr><td style="color:#fff;font-weight:600">项目规范持久化</td><td class="col-highlight">✅ Steering</td><td>⚠️ .cursorrules</td><td>⚠️ instructions</td></tr>
+          <tr><td style="color:#fff;font-weight:600">自动化 Hooks</td><td class="col-highlight">✅ 丰富事件</td><td>❌</td><td>⚠️ 有限</td></tr>
+          <tr><td style="color:#fff;font-weight:600">MCP 支持</td><td class="col-highlight">✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td style="color:#fff;font-weight:600">适合场景</td><td class="col-highlight">团队 / 生产级</td><td>个人 / 快速迭代</td><td>日常编码辅助</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="fade-up delay-3"><div class="bottom-note">Kiro 的优势在<strong style="color:var(--blue)">团队协作</strong>和<strong style="color:var(--blue)">生产级项目</strong></div></div>
+  </div>
+  <span class="slide-number">11 / 14</span>
+</section>
+
+<!-- ===== SLIDE 12: 踩坑经验 ===== -->
+<section class="slide slide--radial-red" id="slide-12">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag tag--red">踩坑经验</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">两个月使用的真实体会</h2></div>
+    <div class="grid-2 fade-up delay-2">
+      <div class="card card--top-green">
+        <div class="card-title" style="color:var(--green);font-size:clamp(1rem,1.5vw,1.2rem);margin-bottom:1rem">👍 做得好的</div>
+        <ul class="bullet-list">
+          <li>Steering 省去大量重复沟通，新人也能快速上手</li>
+          <li>Spec 让复杂功能有章可循，不再靠"感觉"开发</li>
+          <li>Hooks 自动拦截危险操作，减少低级错误</li>
+          <li>基于 VS Code，迁移成本低，插件生态可复用</li>
+        </ul>
+      </div>
+      <div class="card card--top-red">
+        <div class="card-title" style="color:var(--red);font-size:clamp(1rem,1.5vw,1.2rem);margin-bottom:1rem">⚠️ 需要注意的</div>
+        <ul class="bullet-list">
+          <li style="color:rgba(148,163,184,0.5)">[你的踩坑经验 1]</li>
+          <li style="color:rgba(148,163,184,0.5)">[你的踩坑经验 2]</li>
+          <li style="color:rgba(148,163,184,0.5)">[你的踩坑经验 3]</li>
+          <li style="color:rgba(148,163,184,0.5)">[你的踩坑经验 4]</li>
+        </ul>
+      </div>
+    </div>
+    <div class="fade-up delay-3"><div class="bottom-note" style="color:rgba(248,113,113,0.7)">⬆️ 这页需要你填入真实的踩坑经验</div></div>
+  </div>
+  <span class="slide-number">12 / 14</span>
+</section>
+
+<!-- ===== SLIDE 13: 团队落地建议 ===== -->
+<section class="slide slide--radial-green" id="slide-13">
+  <div class="slide-content">
+    <div class="fade-up"><span class="tag tag--green">落地建议</span></div>
+    <div class="fade-up delay-1"><h2 class="section-title">团队落地建议</h2></div>
+    <div class="flow fade-up delay-2">
+      <div class="flow-step" style="border-color:rgba(52,211,153,0.3)"><div class="flow-step-label" style="color:var(--green)">Week 1</div><div class="flow-step-icon">🧭</div><div class="card-title">配 Steering</div><div class="flow-step-text">写好项目规范和编码约定</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(52,211,153,0.3)"><div class="flow-step-label" style="color:var(--green)">Week 2</div><div class="flow-step-icon">⚡</div><div class="card-title">用 Vibe</div><div class="flow-step-text">日常任务用 Vibe 模式</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(52,211,153,0.3)"><div class="flow-step-label" style="color:var(--green)">Week 3</div><div class="flow-step-icon">📐</div><div class="card-title">试 Spec</div><div class="flow-step-text">复杂功能用 Spec 模式</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:rgba(52,211,153,0.3)"><div class="flow-step-label" style="color:var(--green)">Week 4</div><div class="flow-step-icon">⚙️</div><div class="card-title">加 Hooks</div><div class="flow-step-text">配置自动化护栏</div></div>
+    </div>
+    <div class="fade-up delay-3" style="max-width:700px;margin:0 auto">
+      <ul class="bullet-list">
+        <li><strong style="color:#fff">Steering 投入产出比最高</strong> — 写一次，每次对话都生效</li>
+        <li><strong style="color:#fff">不是所有任务都要 Spec</strong> — 简单改动用 Vibe 更高效</li>
+        <li><strong style="color:#fff">Hooks 从简单开始</strong> — 先加安全护栏，再逐步扩展</li>
+        <li><strong style="color:#fff">Steering 是团队资产</strong> — 提交到 Git，团队共享</li>
+      </ul>
+    </div>
+  </div>
+  <span class="slide-number">13 / 14</span>
+</section>
+
+<!-- ===== SLIDE 14: 总结 ===== -->
+<section class="slide slide--radial" id="slide-14">
+  <div class="slide-content" style="text-align:center">
+    <div class="fade-up"><span class="tag">总结</span></div>
+    <div class="fade-up delay-1">
+      <h2 class="section-title" style="font-size:clamp(1.8rem,3.5vw,2.8rem)">Kiro 不只是 AI 助手</h2>
+      <h2 class="section-title" style="font-size:clamp(1.8rem,3.5vw,2.8rem);color:var(--blue)">是给 AI 编码加上纪律的方式</h2>
+    </div>
+    <div class="grid-3 fade-up delay-2" style="max-width:800px;margin:clamp(1.5rem,3vw,2.5rem) auto">
+      <div class="card card--gradient-blue" style="text-align:center"><div class="card-icon">🧭</div><div class="card-title">Steering</div><div class="card-text">规范持久化</div></div>
+      <div class="card card--gradient-purple" style="text-align:center"><div class="card-icon">📐</div><div class="card-title">Specs</div><div class="card-text">开发结构化</div></div>
+      <div class="card card--gradient-orange" style="text-align:center"><div class="card-icon">⚙️</div><div class="card-title">Hooks</div><div class="card-text">流程自动化</div></div>
+    </div>
+    <div class="fade-up delay-3"><div class="quote">意图、规则、决策都版本化在仓库里<br>对话可以丢，但工程纪律不会丢</div></div>
+    <div class="fade-up delay-4" style="margin-top:clamp(1.5rem,3vw,2rem)">
+      <p style="font-size:clamp(1rem,1.5vw,1.2rem);color:var(--text-dim)">🔗 <a href="https://kiro.dev" style="color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(56,189,248,0.3)" target="_blank">kiro.dev</a> &nbsp;·&nbsp; 💬 Q&amp;A 时间</p>
+    </div>
+  </div>
+  <span class="slide-number">14 / 14</span>
+</section>
+
+<script>
+(function(){
+  'use strict';
+  var slides=document.querySelectorAll('.slide');
+  var nav=document.getElementById('navDots');
+  slides.forEach(function(s,i){
+    var d=document.createElement('button');
+    d.className='nav-dot';
+    d.setAttribute('aria-label','跳转到第'+(i+1)+'页');
+    d.addEventListener('click',function(){s.scrollIntoView({behavior:'smooth'})});
+    nav.appendChild(d);
+  });
+  var dots=nav.querySelectorAll('.nav-dot');
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var idx=Array.from(slides).indexOf(e.target);
+        dots.forEach(function(d,i){d.classList.toggle('active',i===idx)});
+        e.target.querySelectorAll('.fade-up').forEach(function(el){el.classList.add('visible')});
+      }
+    });
+  },{threshold:0.35});
+  slides.forEach(function(s){obs.observe(s)});
+  var first=document.getElementById('slide-1');
+  if(first)first.querySelectorAll('.fade-up').forEach(function(el){el.classList.add('visible')});
+  function getIdx(){return Math.round((window.scrollY||document.documentElement.scrollTop)/window.innerHeight)}
+  function go(i){if(i<0)i=0;if(i>=slides.length)i=slides.length-1;slides[i].scrollIntoView({behavior:'smooth'})}
+  document.addEventListener('keydown',function(e){
+    var c=getIdx();
+    switch(e.key){
+      case'ArrowDown':case'ArrowRight':case' ':case'PageDown':e.preventDefault();go(c+1);break;
+      case'ArrowUp':case'ArrowLeft':case'PageUp':e.preventDefault();go(c-1);break;
+      case'Home':e.preventDefault();go(0);break;
+      case'End':e.preventDefault();go(slides.length-1);break;
+    }
+  });
+})();
+</script>
+</body>
+</html>
