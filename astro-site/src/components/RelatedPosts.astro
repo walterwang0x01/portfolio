@@ -1,5 +1,5 @@
 ---
-import { pickGradient, pickEmoji, readingMinutes, type RelatedCandidate } from '@/lib/post-utils';
+import { pickGradient, pickEmoji, readingMinutes, pickTagColorIndex, type RelatedCandidate } from '@/lib/post-utils';
 
 interface Props {
   posts: RelatedCandidate[];
@@ -39,7 +39,7 @@ const cards = posts.map((p) => {
               <span>🕒 {c.minutes} 分钟</span>
             </div>
             <div class="row card-tags">
-              {c.tags.map((t) => <span class="badge">{t}</span>)}
+              {c.tags.map((t) => <span class="badge" data-color={pickTagColorIndex(t)}>{t}</span>)}
             </div>
           </div>
         </a>

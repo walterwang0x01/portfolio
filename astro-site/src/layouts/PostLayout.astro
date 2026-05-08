@@ -2,7 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import PostEnhance from '@/components/PostEnhance.astro';
 import RelatedPosts from '@/components/RelatedPosts.astro';
-import type { RelatedCandidate } from '@/lib/post-utils';
+import { pickTagColorIndex, type RelatedCandidate } from '@/lib/post-utils';
 
 interface Props {
   title: string;
@@ -27,7 +27,7 @@ const BASE = import.meta.env.BASE_URL;
         <span>📅 <time datetime={dateStr}>{dateStr}</time></span>
         {minutes && <><span aria-hidden="true">·</span><span>🕒 {minutes} 分钟阅读</span></>}
         <span aria-hidden="true">·</span>
-        <div class="row">{tags.map((t: string) => <span class="badge">{t}</span>)}</div>
+        <div class="row">{tags.map((t: string) => <span class="badge" data-color={pickTagColorIndex(t)}>{t}</span>)}</div>
       </div>
     </header>
     <div class="post-body"><slot /></div>

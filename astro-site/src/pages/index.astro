@@ -4,6 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import AuthorCard from '@/components/AuthorCard.astro';
 import SubscribeCTA from '@/components/SubscribeCTA.astro';
 import PostCard from '@/components/PostCard.astro';
+import { pickTagColorIndex } from '@/lib/post-utils';
 
 const PAGE_SIZE = 9; // 首页第 1 页展示数（featured 算其中 1 条）
 
@@ -17,8 +18,8 @@ for (const p of posts) {
 const allTags = [...tagCount.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .map(([t]) => t);
-const hotTags = allTags.slice(0, 10);
-const restTags = allTags.slice(10);
+const hotTags = allTags.slice(0, 8);
+const restTags = allTags.slice(8);
 const lastUpdated = posts[0]?.data.date.toISOString().slice(0, 10) ?? '';
 
 const pageItems = posts.slice(0, PAGE_SIZE);
@@ -59,7 +60,11 @@ const BASE = import.meta.env.BASE_URL;
     <AuthorCard />
 
     <div class="toolbar">
-      <input id="searchInput" type="search" class="search-input" placeholder="🔎 搜索文章标题、摘要、标签…" />
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">🔎</span>
+        <input id="searchInput" type="search" class="search-input" placeholder="搜索文章标题、摘要、标签…" />
+        <button type="button" id="searchClear" class="search-clear" aria-label="清除搜索" hidden>✕</button>
+      </div>
     </div>
 
     <div class="tag-section">
@@ -73,13 +78,21 @@ const BASE = import.meta.env.BASE_URL;
       </div>
       <div id="tagFilter" class="tag-filter" role="toolbar" aria-label="标签过滤">
         <button type="button" class="badge active" data-tag="">全部</button>
-        {hotTags.map((t) => (<button type="button" class="badge" data-tag={t}>{t}</button>))}
+        {hotTags.map((t) => (<button type="button" class="badge" data-tag={t} data-color={pickTagColorIndex(t)}>{t}</button>))}
         {restTags.length > 0 && (
           <div id="tagMore" class="tag-more" hidden>
-            {restTags.map((t) => (<button type="button" class="badge" data-tag={t}>{t}</button>))}
+            {restTags.map((t) => (<button type="button" class="badge" data-tag={t} data-color={pickTagColorIndex(t)}>{t}</button>))}
           </div>
         )}
       </div>
+    </div>
+
+    <div id="filterStatus" class="filter-status" hidden>
+      <span class="filter-status-text">
+        <span id="filterStatusLabel"></span>
+        · 找到 <b id="filterStatusCount">0</b> 篇
+      </span>
+      <button type="button" id="filterReset" class="filter-reset">清除筛选</button>
     </div>
 
     {featured && (
@@ -99,7 +112,10 @@ const BASE = import.meta.env.BASE_URL;
     <div id="postList" class="post-grid">
       {rest.map((p) => <PostCard post={p} />)}
     </div>
-    <div id="emptyState" class="empty" hidden>没有匹配的文章，换个关键词试试？</div>
+    <div id="emptyState" class="empty" hidden>
+      <p>没有匹配的文章</p>
+      <button type="button" class="empty-reset" id="emptyReset">← 清除筛选查看全部</button>
+    </div>
 
     {totalPages > 1 && (
       <nav class="pagination" aria-label="分页">
@@ -125,6 +141,7 @@ const BASE = import.meta.env.BASE_URL;
     })();
 
     const input = document.getElementById('searchInput') as HTMLInputElement | null;
+    const searchClear = document.getElementById('searchClear') as HTMLButtonElement | null;
     const tagBar = document.getElementById('tagFilter');
     const tagToggle = document.getElementById('tagToggle') as HTMLButtonElement | null;
     const tagMore = document.getElementById('tagMore') as HTMLElement | null;
@@ -132,8 +149,26 @@ const BASE = import.meta.env.BASE_URL;
     const tagButtons = () => Array.from(document.querySelectorAll<HTMLButtonElement>('#tagFilter button[data-tag]'));
     const postCount = document.getElementById('postCount');
     const emptyState = document.getElementById('emptyState');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterStatusLabel = document.getElementById('filterStatusLabel');
+    const filterStatusCount = document.getElementById('filterStatusCount');
+    const filterReset = document.getElementById('filterReset');
+    const emptyReset = document.getElementById('emptyReset');
     let activeTag = '';
     let query = '';
+
+    function updateStatus(visible: number) {
+      const active = !!activeTag || !!query;
+      if (!filterStatus) return;
+      filterStatus.hidden = !active;
+      if (active && filterStatusLabel) {
+        const parts: string[] = [];
+        if (query) parts.push(`关键词 "${query}"`);
+        if (activeTag) parts.push(`主题 ${activeTag}`);
+        filterStatusLabel.textContent = parts.join(' + ');
+      }
+      if (filterStatusCount) filterStatusCount.textContent = String(visible);
+    }
 
     function apply() {
       const q = query.toLowerCase();
@@ -150,9 +185,23 @@ const BASE = import.meta.env.BASE_URL;
       }
       if (postCount) postCount.textContent = `${visible} 篇`;
       if (emptyState) emptyState.hidden = visible !== 0;
+      if (searchClear) searchClear.hidden = !query;
+      updateStatus(visible);
+    }
+
+    function resetFilter() {
+      query = '';
+      activeTag = '';
+      if (input) input.value = '';
+      tagButtons().forEach((b, i) => b.classList.toggle('active', i === 0));
+      apply();
     }
 
     input?.addEventListener('input', () => { query = input.value.trim(); apply(); });
+    searchClear?.addEventListener('click', () => { if (input) input.value = ''; query = ''; apply(); input?.focus(); });
+    filterReset?.addEventListener('click', resetFilter);
+    emptyReset?.addEventListener('click', resetFilter);
+
     tagBar?.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('button[data-tag]') as HTMLButtonElement | null;
       if (!btn) return;

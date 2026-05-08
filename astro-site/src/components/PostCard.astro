@@ -1,5 +1,5 @@
 ---
-import { pickGradient, pickEmoji, readingMinutes } from '@/lib/post-utils';
+import { pickGradient, pickEmoji, readingMinutes, pickTagColorIndex } from '@/lib/post-utils';
 
 interface Post {
   slug: string;
@@ -42,10 +42,16 @@ const tagsShown = post.data.tags.slice(0, maxTags);
 >
   <div class={`cover ${featured ? 'cover--featured' : ''}`} style={coverStyle}>
     {!post.data.cover && <span class="cover-emoji" aria-hidden="true">{emoji}</span>}
-    {featured && <span class="cover-badge">置顶</span>}
+    {featured && <span class="cover-badge cover-badge--featured">📌 编辑推荐</span>}
   </div>
   <div class="post-card-body">
     <h2>{post.data.title}</h2>
+    {featured && (
+      <div class="featured-intro">
+        <span aria-hidden="true">✨</span>
+        <span>最新力作 · 推荐从这篇开始</span>
+      </div>
+    )}
     <div class="meta">
       <time datetime={dateStr}>{dateStr}</time>
       <span aria-hidden="true">·</span>
@@ -53,7 +59,7 @@ const tagsShown = post.data.tags.slice(0, maxTags);
     </div>
     <p class="excerpt">{post.data.excerpt}</p>
     <div class="row card-tags">
-      {tagsShown.map((t) => <span class="badge">{t}</span>)}
+      {tagsShown.map((t) => <span class="badge" data-color={pickTagColorIndex(t)}>{t}</span>)}
     </div>
   </div>
 </a>

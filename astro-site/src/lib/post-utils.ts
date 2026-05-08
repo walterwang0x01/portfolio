@@ -128,3 +128,14 @@ export function findRelated(current: RelatedCandidate, all: RelatedCandidate[], 
   }
   return picked;
 }
+
+
+/**
+ * 同一个标签始终映射到同一个颜色（0-5），和 CSS `.badge[data-color]` 配合使用。
+ */
+export function pickTagColorIndex(tag: string): number {
+  // 复用上面的 djb2 哈希（同模块内重新定义以免导出私有符号）
+  let h = 5381;
+  for (let i = 0; i < tag.length; i++) h = ((h << 5) + h + tag.charCodeAt(i)) | 0;
+  return Math.abs(h) % 6;
+}

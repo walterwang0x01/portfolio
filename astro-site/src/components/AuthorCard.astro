@@ -1,5 +1,5 @@
 ---
-// 关于作者小卡。改这里就能改作者信息。
+// 关于作者小卡。默认紧凑一行，点击展开完整信息。
 const AUTHOR = {
   name: 'Walter',
   handle: '@WalterHandsome',
@@ -12,20 +12,23 @@ const AUTHOR = {
   ],
 };
 ---
-<aside class="author-card" aria-label="关于作者">
-  <img
-    class="author-avatar"
-    src={AUTHOR.avatar}
-    alt={`${AUTHOR.name} 的头像`}
-    width="56"
-    height="56"
-    loading="lazy"
-  />
-  <div class="author-body">
-    <div class="author-name">
-      {AUTHOR.name}
+<details class="author-card" aria-label="关于作者">
+  <summary class="author-summary">
+    <img
+      class="author-avatar"
+      src={AUTHOR.avatar}
+      alt={`${AUTHOR.name} 的头像`}
+      width="40"
+      height="40"
+      loading="lazy"
+    />
+    <div class="author-summary-text">
+      <span class="author-name">{AUTHOR.name}</span>
       <span class="author-handle">{AUTHOR.handle}</span>
     </div>
+    <span class="author-chevron" aria-hidden="true">▸</span>
+  </summary>
+  <div class="author-body">
     <p class="author-bio">{AUTHOR.bio}</p>
     <div class="author-links">
       {AUTHOR.links.map((l) => (
@@ -41,4 +44,4 @@ const AUTHOR = {
       ))}
     </div>
   </div>
-</aside>
+</details>
