@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCard from '@/components/PostCard.astro';
+import SubscribeCTA from '@/components/SubscribeCTA.astro';
+
+export async function getStaticPaths() {
+  const PAGE_SIZE = 9;
+  const all = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const totalPages = Math.ceil(posts.length / PAGE_SIZE);
+
+  const pages = [];
+  // 从第 2 页开始（第 1 页由 index.astro 处理）
+  for (let i = 2; i <= totalPages; i++) {
+    const start = (i - 1) * PAGE_SIZE;
+    pages.push({
+      params: { num: String(i) },
+      props: {
+        page: i,
+        totalPages,
+        items: posts.slice(start, start + PAGE_SIZE),
+      },
+    });
+  }
+  return pages;
+}
+
+const { page, totalPages, items } = Astro.props;
+const BASE = import.meta.env.BASE_URL;
+
+const prevHref = page === 2 ? BASE : `${BASE}page/${page - 1}/`;
+const nextHref = page < totalPages ? `${BASE}page/${page + 1}/` : null;
+---
+<BaseLayout title={`第 ${page} 页 — Walter's Tech Blog`} activeNav="blog">
+  <section class="container">
+    <header class="page-hero" style="margin-top: var(--space-6)">
+      <h1>📚 文章归档 · 第 {page} 页</h1>
+      <p>共 {totalPages} 页</p>
+    </header>
+
+    <div class="post-grid">
+      {items.map((p) => <PostCard post={p} />)}
+    </div>
+
+    <nav class="pagination" aria-label="分页">
+      <a class="pagination-btn" href={prevHref}>← 上一页</a>
+      <span class="pagination-info">第 {page} / {totalPages} 页</span>
+      {nextHref
+        ? <a class="pagination-btn" href={nextHref}>下一页 →</a>
+        : <a class="pagination-btn" aria-disabled="true">下一页 →</a>}
+    </nav>
+
+    <SubscribeCTA />
+  </section>
+</BaseLayout>

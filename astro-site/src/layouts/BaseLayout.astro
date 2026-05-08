@@ -7,11 +7,13 @@ interface Props {
   title: string;
   description?: string;
   activeNav?: 'blog' | 'briefing';
+  ogImage?: string;
 }
 
-const { title, description = "Walter's Tech Blog — AI Agent 与工程实践", activeNav = 'blog' } = Astro.props;
+const { title, description = "Walter's Tech Blog — AI Agent 与工程实践", activeNav = 'blog', ogImage } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const BASE = import.meta.env.BASE_URL;
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined;
 ---
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -19,6 +21,8 @@ const BASE = import.meta.env.BASE_URL;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title="RSS" href={`${BASE}rss.xml`} />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
@@ -26,9 +30,13 @@ const BASE = import.meta.env.BASE_URL;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    {ogImageUrl && <meta property="og:image:width" content="1200" />}
+    {ogImageUrl && <meta property="og:image:height" content="630" />}
+    <meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
     <title>{title}</title>
     <script is:inline>
       const saved = localStorage.getItem('theme');
@@ -47,7 +55,7 @@ const BASE = import.meta.env.BASE_URL;
           <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
           <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
         </ul>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div class="navbar-actions">
           <button class="menu-toggle" id="menuToggle" aria-label="打开导航菜单" aria-expanded="false">☰</button>
           <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌙</button>
         </div>
@@ -61,7 +69,7 @@ const BASE = import.meta.env.BASE_URL;
     <main id="main"><slot /></main>
     <footer>
       <p>© {new Date().getFullYear()} Walter's Tech Blog · Powered by Astro</p>
-      <p style="margin-top:8px;font-size:12px;color:var(--text-tertiary)">
+      <p class="visit-stats">
         👀 本页访问 <span id="busuanzi_value_page_pv">--</span> 次 · 全站访客 <span id="busuanzi_value_site_uv">--</span> 人
       </p>
     </footer>

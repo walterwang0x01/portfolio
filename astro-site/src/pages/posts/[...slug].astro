@@ -1,15 +1,31 @@
 ---
 import { getCollection } from 'astro:content';
 import PostLayout from '@/layouts/PostLayout.astro';
+import { readingMinutes, findRelated } from '@/lib/post-utils';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
-  return posts.map((p) => ({ params: { slug: p.slug }, props: { post: p } }));
+  return posts.map((p) => ({
+    params: { slug: p.slug },
+    props: { post: p, all: posts },
+  }));
 }
 
-const { post } = Astro.props;
+const { post, all } = Astro.props;
 const { Content } = await post.render();
+const minutes = readingMinutes(post.body);
+const related = findRelated(post, all, 3);
+const BASE = import.meta.env.BASE_URL;
+const ogImage = `${BASE}og/${post.slug}.png`;
 ---
-<PostLayout title={post.data.title} date={post.data.date} tags={post.data.tags} excerpt={post.data.excerpt}>
+<PostLayout
+  title={post.data.title}
+  date={post.data.date}
+  tags={post.data.tags}
+  excerpt={post.data.excerpt}
+  minutes={minutes}
+  related={related}
+  ogImage={ogImage}
+>
   <Content />
 </PostLayout>

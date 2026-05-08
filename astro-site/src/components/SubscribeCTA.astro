@@ -1,0 +1,21 @@
+---
+// 订阅 CTA：GitHub Star + RSS。没邮件服务，这是最诚实的 CTA。
+const BASE = import.meta.env.BASE_URL;
+const GITHUB = 'https://github.com/WalterHandsome/tech-learning-and-projects';
+---
+<section class="cta">
+  <div class="cta-inner">
+    <div class="cta-text">
+      <h3 class="cta-title">喜欢这些内容？</h3>
+      <p class="cta-desc">在 GitHub 上 Star 仓库，或订阅 RSS 获取最新更新。</p>
+    </div>
+    <div class="cta-actions">
+      <a class="cta-btn cta-btn--primary" href={GITHUB} target="_blank" rel="noopener">
+        ⭐ GitHub Star
+      </a>
+      <a class="cta-btn" href={`${BASE}rss.xml`} target="_blank" rel="noopener">
+        📡 RSS 订阅
+      </a>
+    </div>
+  </div>
+</section>

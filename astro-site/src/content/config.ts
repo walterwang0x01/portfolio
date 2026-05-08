@@ -9,6 +9,10 @@ const blog = defineCollection({
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     excerpt: z.string().min(1).max(400),
+    // 封面图：可选。URL 或相对路径。没填就渲染渐变+emoji 自动封面
+    cover: z.string().optional(),
+    // 自动封面上显示的 emoji，不填会根据首个 tag 自动匹配
+    emoji: z.string().optional(),
     // 预留：未来 VIP 文章设 true，构建期分流到受保护路径
     vip: z.boolean().default(false),
     draft: z.boolean().default(false),

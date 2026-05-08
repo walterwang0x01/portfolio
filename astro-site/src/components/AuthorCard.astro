@@ -1,0 +1,44 @@
+---
+// 关于作者小卡。改这里就能改作者信息。
+const AUTHOR = {
+  name: 'Walter',
+  handle: '@WalterHandsome',
+  bio: '专注 AI Agent 架构与工程实践，分享从 0 到 1 的构建经验与踩坑心得。',
+  avatar: 'https://github.com/WalterHandsome.png',
+  links: [
+    { label: 'GitHub', href: 'https://github.com/WalterHandsome', icon: '⭐' },
+    { label: 'RSS', href: '/portfolio/rss.xml', icon: '📡' },
+    { label: '简报', href: '/portfolio/briefing/', icon: '📰' },
+  ],
+};
+---
+<aside class="author-card" aria-label="关于作者">
+  <img
+    class="author-avatar"
+    src={AUTHOR.avatar}
+    alt={`${AUTHOR.name} 的头像`}
+    width="56"
+    height="56"
+    loading="lazy"
+  />
+  <div class="author-body">
+    <div class="author-name">
+      {AUTHOR.name}
+      <span class="author-handle">{AUTHOR.handle}</span>
+    </div>
+    <p class="author-bio">{AUTHOR.bio}</p>
+    <div class="author-links">
+      {AUTHOR.links.map((l) => (
+        <a
+          class="author-link"
+          href={l.href}
+          target={l.href.startsWith('http') ? '_blank' : undefined}
+          rel={l.href.startsWith('http') ? 'noopener' : undefined}
+        >
+          <span aria-hidden="true">{l.icon}</span>
+          {l.label}
+        </a>
+      ))}
+    </div>
+  </div>
+</aside>

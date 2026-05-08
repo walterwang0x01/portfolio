@@ -1,37 +1,117 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import AuthorCard from '@/components/AuthorCard.astro';
+import SubscribeCTA from '@/components/SubscribeCTA.astro';
+import PostCard from '@/components/PostCard.astro';
+
+const PAGE_SIZE = 9; // 首页第 1 页展示数（featured 算其中 1 条）
 
 const all = await getCollection('blog', ({ data }) => !data.draft);
 const posts = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const allTags = [...new Set(posts.flatMap((p) => p.data.tags))];
+
+const tagCount = new Map<string, number>();
+for (const p of posts) {
+  for (const t of p.data.tags) tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+}
+const allTags = [...tagCount.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([t]) => t);
+const hotTags = allTags.slice(0, 10);
+const restTags = allTags.slice(10);
+const lastUpdated = posts[0]?.data.date.toISOString().slice(0, 10) ?? '';
+
+const pageItems = posts.slice(0, PAGE_SIZE);
+const [featured, ...rest] = pageItems;
+const totalPages = Math.ceil(posts.length / PAGE_SIZE);
 const BASE = import.meta.env.BASE_URL;
 ---
 <BaseLayout title="Walter's Tech Blog" activeNav="blog">
-  <section class="container-narrow">
-    <h1 style="font-size: 28px; margin-bottom: 8px; color: var(--text-primary)">⚡ Walter's Tech Blog</h1>
-    <p style="color: var(--text-tertiary); margin-bottom: 24px;">AI Agent · 工程实践 · 系统设计</p>
-    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom: 20px;">
-      <input id="searchInput" type="search" placeholder="搜索文章标题、摘要、标签…" style="flex:1; min-width: 220px; padding: 10px 14px; border:1px solid var(--border-color); border-radius: 10px; background: var(--card-bg); color: var(--text-primary); font-size: 14px;" />
-    </div>
-    <div id="tagFilter" style="margin-bottom: 20px; display:flex; flex-wrap:wrap; gap:8px;">
-      <button class="badge" data-tag="" style="cursor:pointer;border:none;">全部</button>
-      {allTags.map((t) => (<button class="badge" data-tag={t} style="cursor:pointer;border:none;">{t}</button>))}
-    </div>
-    <div id="postList">
-      {posts.map((p) => (
-        <a class="post-card" href={`${BASE}posts/${p.slug}/`} data-title={p.data.title} data-excerpt={p.data.excerpt} data-tags={p.data.tags.join(',')}>
-          <h2>{p.data.title}</h2>
-          <div class="meta">
-            <time datetime={p.data.date.toISOString().slice(0,10)}>{p.data.date.toISOString().slice(0,10)}</time>
-            {' · '}
-            {p.data.tags.map((t) => <span class="badge">{t}</span>)}
-          </div>
-          <p class="excerpt">{p.data.excerpt}</p>
-        </a>
-      ))}
+  <section class="hero">
+    <div class="hero-inner container-narrow">
+      <div class="hero-eyebrow">⚡ AI Agent · 工程实践 · 系统设计</div>
+      <h1 class="hero-title">
+        用代码和思考<br />
+        记录 <span class="hero-accent">AI Agent 时代</span>
+      </h1>
+      <p class="hero-subtitle">
+        从 Agent 架构、记忆系统、上下文工程，到多 Agent 协作与支付协议。
+        深度内容，持续更新。
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num">{posts.length}</span>
+          <span class="stat-label">篇文章</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{allTags.length}</span>
+          <span class="stat-label">个主题</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">{lastUpdated.slice(5)}</span>
+          <span class="stat-label">最近更新</span>
+        </div>
+      </div>
     </div>
   </section>
+
+  <section class="container" aria-label="文章浏览">
+    <AuthorCard />
+
+    <div class="toolbar">
+      <input id="searchInput" type="search" class="search-input" placeholder="🔎 搜索文章标题、摘要、标签…" />
+    </div>
+
+    <div class="tag-section">
+      <div class="tag-section-head">
+        <h2 class="section-label">按主题浏览</h2>
+        {restTags.length > 0 && (
+          <button type="button" id="tagToggle" class="tag-toggle" aria-expanded="false">
+            展开全部 ({allTags.length})
+          </button>
+        )}
+      </div>
+      <div id="tagFilter" class="tag-filter" role="toolbar" aria-label="标签过滤">
+        <button type="button" class="badge active" data-tag="">全部</button>
+        {hotTags.map((t) => (<button type="button" class="badge" data-tag={t}>{t}</button>))}
+        {restTags.length > 0 && (
+          <div id="tagMore" class="tag-more" hidden>
+            {restTags.map((t) => (<button type="button" class="badge" data-tag={t}>{t}</button>))}
+          </div>
+        )}
+      </div>
+    </div>
+
+    {featured && (
+      <>
+        <div class="list-head">
+          <h2 class="section-label">置顶推荐</h2>
+        </div>
+        <PostCard post={featured} featured={true} maxTags={4} />
+      </>
+    )}
+
+    <div class="list-head">
+      <h2 class="section-label">全部文章</h2>
+      <span id="postCount" class="text-muted text-sm">{posts.length} 篇</span>
+    </div>
+
+    <div id="postList" class="post-grid">
+      {rest.map((p) => <PostCard post={p} />)}
+    </div>
+    <div id="emptyState" class="empty" hidden>没有匹配的文章，换个关键词试试？</div>
+
+    {totalPages > 1 && (
+      <nav class="pagination" aria-label="分页">
+        <a class="pagination-btn" aria-disabled="true">← 上一页</a>
+        <span class="pagination-info">第 1 / {totalPages} 页</span>
+        <a class="pagination-btn" href={`${BASE}page/2/`}>下一页 →</a>
+      </nav>
+    )}
+
+    <SubscribeCTA />
+  </section>
+
   <script>
     (function () {
       const hash = location.hash.slice(1);
@@ -43,28 +123,51 @@ const BASE = import.meta.env.BASE_URL;
         location.replace(href);
       }
     })();
+
     const input = document.getElementById('searchInput') as HTMLInputElement | null;
     const tagBar = document.getElementById('tagFilter');
-    const cards = Array.from(document.querySelectorAll<HTMLAnchorElement>('#postList .post-card'));
+    const tagToggle = document.getElementById('tagToggle') as HTMLButtonElement | null;
+    const tagMore = document.getElementById('tagMore') as HTMLElement | null;
+    const allCards = Array.from(document.querySelectorAll<HTMLAnchorElement>('.post-card'));
+    const tagButtons = () => Array.from(document.querySelectorAll<HTMLButtonElement>('#tagFilter button[data-tag]'));
+    const postCount = document.getElementById('postCount');
+    const emptyState = document.getElementById('emptyState');
     let activeTag = '';
     let query = '';
+
     function apply() {
       const q = query.toLowerCase();
-      for (const c of cards) {
+      let visible = 0;
+      for (const c of allCards) {
         const title = c.dataset.title?.toLowerCase() ?? '';
         const excerpt = c.dataset.excerpt?.toLowerCase() ?? '';
         const tags = (c.dataset.tags ?? '').split(',');
         const matchQ = !q || title.includes(q) || excerpt.includes(q) || tags.some((t) => t.toLowerCase().includes(q));
         const matchT = !activeTag || tags.includes(activeTag);
-        c.style.display = matchQ && matchT ? '' : 'none';
+        const show = matchQ && matchT;
+        c.style.display = show ? '' : 'none';
+        if (show) visible++;
       }
+      if (postCount) postCount.textContent = `${visible} 篇`;
+      if (emptyState) emptyState.hidden = visible !== 0;
     }
+
     input?.addEventListener('input', () => { query = input.value.trim(); apply(); });
     tagBar?.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest('button[data-tag]') as HTMLButtonElement | null;
       if (!btn) return;
       activeTag = btn.dataset.tag ?? '';
+      tagButtons().forEach((b) => b.classList.toggle('active', b === btn));
       apply();
+    });
+
+    const totalTagCount = tagButtons().length - 1;
+    tagToggle?.addEventListener('click', () => {
+      if (!tagMore) return;
+      const isOpen = !tagMore.hidden;
+      tagMore.hidden = isOpen;
+      tagToggle.setAttribute('aria-expanded', String(!isOpen));
+      tagToggle.textContent = isOpen ? `展开全部 (${totalTagCount})` : '收起';
     });
   </script>
 </BaseLayout>

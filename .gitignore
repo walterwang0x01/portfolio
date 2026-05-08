@@ -1,0 +1,13 @@
+# 依赖/构建产物在各子项目的 .gitignore 里各自处理
+# 这里只放根仓库级的敏感/本地配置
+
+# MCP 配置里可能含 API Key
+.kiro/settings/mcp.json
+
+# 本地环境变量
+.env
+.env.local
+
+# 系统/编辑器
+.DS_Store
+*.swp

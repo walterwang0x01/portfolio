@@ -3,16 +3,18 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 ---
 <BaseLayout title="每日简报 — Walter's Tech Blog" description="AI Agent · 国内科技 · 国际科技每日简报" activeNav="briefing">
   <section class="container-narrow">
-    <h1 style="font-size: 26px; margin-bottom: 6px; color: var(--text-primary)">📰 每日技术简报</h1>
-    <p style="color: var(--text-tertiary); margin-bottom: 20px;">AI Agent · 国内科技 · 国际科技 — 每日精选，自动采集</p>
-    <div id="topicTabs" style="display:flex; gap:8px; margin-bottom: 16px; flex-wrap:wrap;">
-      <button class="badge" data-topic="ai-agent" style="cursor:pointer;border:none;">🤖 AI Agent</button>
-      <button class="badge" data-topic="china-tech" style="cursor:pointer;border:none;">🇨🇳 国内科技</button>
-      <button class="badge" data-topic="global-tech" style="cursor:pointer;border:none;">🌍 国际科技</button>
+    <header class="page-hero">
+      <h1>📰 每日技术简报</h1>
+      <p>AI Agent · 国内科技 · 国际科技 — 每日精选，自动采集</p>
+    </header>
+    <div id="topicTabs" class="tag-filter" role="toolbar" aria-label="主题切换">
+      <button type="button" class="badge active" data-topic="ai-agent">🤖 AI Agent</button>
+      <button type="button" class="badge" data-topic="china-tech">🇨🇳 国内科技</button>
+      <button type="button" class="badge" data-topic="global-tech">🌍 国际科技</button>
     </div>
-    <div id="dateList" style="display:flex; gap:6px; margin-bottom: 16px; overflow-x:auto; padding-bottom:4px;"></div>
-    <div id="briefingContent" class="post-body" style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--card-bg);">
-      <div style="text-align:center; padding: 40px; color: var(--text-tertiary);">加载中…</div>
+    <div id="dateList" class="date-strip" aria-label="日期列表"></div>
+    <div id="briefingContent" class="post-body briefing-panel">
+      <div class="empty">加载中…</div>
     </div>
   </section>
   <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
@@ -66,30 +68,38 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
         return window.marked.parse(md, { breaks: true, gfm: true });
       }
 
+      function setActiveButton(container, attr, value) {
+        container.querySelectorAll(`button[${attr}]`).forEach((b) => {
+          b.classList.toggle('active', b.getAttribute(attr) === value);
+        });
+      }
+
       async function switchTopic(t) {
         topic = t;
-        content.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-tertiary);">加载中…</div>';
+        setActiveButton(tabs, 'data-topic', t);
+        content.innerHTML = '<div class="empty">加载中…</div>';
         const dates = await fetchDates(t);
         if (!dates.length) {
           dateList.innerHTML = '';
-          content.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-tertiary);">📭 暂无简报</div>';
+          content.innerHTML = '<div class="empty">📭 暂无简报</div>';
           return;
         }
         const d = date && dates.includes(date) ? date : dates[0];
         date = d;
         dateList.innerHTML = dates.slice(0, 14).map((x) =>
-          `<button class="badge" data-date="${x}" style="cursor:pointer;border:none;${x === d ? 'background:var(--primary);color:#fff' : ''}">${x.slice(5)}</button>`
+          `<button type="button" class="badge${x === d ? ' active' : ''}" data-date="${x}">${x.slice(5)}</button>`
         ).join('');
         await load(t, d);
       }
 
       async function load(t, d) {
         date = d;
+        setActiveButton(dateList, 'data-date', d);
         try {
           const md = await fetchContent(t, d);
           content.innerHTML = render(md);
         } catch (e) {
-          content.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-tertiary);">😕 加载失败：${e.message}</div>`;
+          content.innerHTML = `<div class="empty">😕 加载失败：${e.message}</div>`;
         }
       }
 

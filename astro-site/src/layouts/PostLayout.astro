@@ -1,31 +1,38 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import PostEnhance from '@/components/PostEnhance.astro';
+import RelatedPosts from '@/components/RelatedPosts.astro';
+import type { RelatedCandidate } from '@/lib/post-utils';
 
 interface Props {
   title: string;
   date: Date;
   tags: string[];
   excerpt: string;
+  minutes?: number;
+  related?: RelatedCandidate[];
+  ogImage?: string;
 }
 
-const { title, date, tags, excerpt } = Astro.props;
+const { title, date, tags, excerpt, minutes, related = [], ogImage } = Astro.props;
 const dateStr = date.toISOString().slice(0, 10);
 const BASE = import.meta.env.BASE_URL;
 ---
-<BaseLayout title={`${title} — Walter's Tech Blog`} description={excerpt}>
+<BaseLayout title={`${title} — Walter's Tech Blog`} description={excerpt} ogImage={ogImage}>
   <article class="container-narrow">
-    <header style="margin-bottom: 32px;">
-      <a href={BASE} style="font-size: 14px; color: var(--text-tertiary)">← 返回博客列表</a>
-      <h1 style="font-size: 30px; margin: 16px 0 12px; color: var(--text-primary)">{title}</h1>
-      <div style="font-size: 13px; color: var(--text-tertiary); display:flex; gap: 12px; align-items:center; flex-wrap:wrap;">
+    <header class="post-header">
+      <a href={BASE} class="back-link">← 返回博客列表</a>
+      <h1>{title}</h1>
+      <div class="post-meta">
         <span>📅 <time datetime={dateStr}>{dateStr}</time></span>
-        <span>·</span>
-        <div>{tags.map((t: string) => <span class="badge">{t}</span>)}</div>
+        {minutes && <><span aria-hidden="true">·</span><span>🕒 {minutes} 分钟阅读</span></>}
+        <span aria-hidden="true">·</span>
+        <div class="row">{tags.map((t: string) => <span class="badge">{t}</span>)}</div>
       </div>
     </header>
     <div class="post-body"><slot /></div>
-    <hr style="margin: 48px 0 24px; border: none; border-top: 1px solid var(--border-color)" />
+    <RelatedPosts posts={related} />
+    <hr />
     <div id="comments"></div>
   </article>
   <PostEnhance />
@@ -34,7 +41,7 @@ const BASE = import.meta.env.BASE_URL;
       const slug = location.pathname.replace(/^.*\/posts\//, '').replace(/\/$/, '');
       const container = document.getElementById('comments');
       if (!container) return;
-      container.innerHTML = '<h3 style="margin-bottom: 12px; color: var(--text-primary)">💬 评论</h3>';
+      container.innerHTML = '<h3 class="comments-heading">💬 评论</h3>';
       const s = document.createElement('script');
       s.src = 'https://giscus.app/client.js';
       s.setAttribute('data-repo', 'WalterHandsome/portfolio');
