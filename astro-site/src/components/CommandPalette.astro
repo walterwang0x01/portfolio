@@ -1,0 +1,235 @@
+---
+import { getCollection } from 'astro:content';
+import { readingMinutes, pickEmoji } from '@/lib/post-utils';
+
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const sorted = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const BASE = import.meta.env.BASE_URL;
+
+// 打平成客户端可用的索引
+const index = sorted.map((p) => ({
+  slug: p.slug,
+  title: p.data.title,
+  excerpt: p.data.excerpt,
+  tags: p.data.tags,
+  date: p.data.date.toISOString().slice(0, 10),
+  minutes: readingMinutes(p.body),
+  emoji: pickEmoji(p.data.tags, p.data.emoji),
+  url: `${BASE}posts/${p.slug}/`,
+}));
+
+// 标签 → 文章数
+const tagCount = new Map<string, number>();
+for (const p of sorted) {
+  for (const t of p.data.tags) tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+}
+const tags = [...tagCount.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([name, count]) => ({ name, count }));
+
+// 快速导航
+const navItems = [
+  { label: '🏠 首页', url: BASE, kind: 'nav' },
+  { label: '📚 文章归档', url: `${BASE}archive/`, kind: 'nav' },
+  { label: '📰 每日简报', url: `${BASE}briefing/`, kind: 'nav' },
+  { label: '📡 RSS 订阅', url: `${BASE}rss.xml`, kind: 'nav' },
+  { label: '⭐ GitHub', url: 'https://github.com/WalterHandsome', kind: 'nav' },
+];
+---
+<div class="cmdk" id="cmdk" aria-hidden="true" role="dialog" aria-label="命令面板" data-index={JSON.stringify(index)} data-tags={JSON.stringify(tags)} data-nav={JSON.stringify(navItems)}>
+  <div class="cmdk-backdrop" data-close></div>
+  <div class="cmdk-panel" role="document">
+    <div class="cmdk-input-wrap">
+      <span class="cmdk-search-icon" aria-hidden="true">🔎</span>
+      <input
+        type="text"
+        id="cmdkInput"
+        class="cmdk-input"
+        placeholder="搜索文章、主题，或输入 > 跳转页面..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <kbd class="cmdk-hint">ESC</kbd>
+    </div>
+    <div class="cmdk-tabs" role="tablist">
+      <button type="button" class="cmdk-tab active" data-tab="all" role="tab">全部</button>
+      <button type="button" class="cmdk-tab" data-tab="posts" role="tab">文章</button>
+      <button type="button" class="cmdk-tab" data-tab="tags" role="tab">主题</button>
+      <button type="button" class="cmdk-tab" data-tab="nav" role="tab">导航</button>
+    </div>
+    <div class="cmdk-results" id="cmdkResults" role="listbox"></div>
+    <div class="cmdk-footer">
+      <span><kbd class="kbd">↑</kbd><kbd class="kbd">↓</kbd> 选择</span>
+      <span><kbd class="kbd">⏎</kbd> 打开</span>
+      <span><kbd class="kbd">ESC</kbd> 关闭</span>
+    </div>
+  </div>
+</div>
+<script is:inline>
+  (function () {
+    const root = document.getElementById('cmdk');
+    if (!root) return;
+    const input = document.getElementById('cmdkInput');
+    const results = document.getElementById('cmdkResults');
+    const tabs = root.querySelectorAll('.cmdk-tab');
+    const index = JSON.parse(root.getAttribute('data-index') || '[]');
+    const tags = JSON.parse(root.getAttribute('data-tags') || '[]');
+    const navItems = JSON.parse(root.getAttribute('data-nav') || '[]');
+    let currentTab = 'all';
+    let currentQuery = '';
+    let cursor = 0;
+    let currentResults = [];
+
+    function open() {
+      root.setAttribute('aria-hidden', 'false');
+      root.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => input && input.focus(), 50);
+      render();
+    }
+    function close() {
+      root.setAttribute('aria-hidden', 'true');
+      root.classList.remove('open');
+      document.body.style.overflow = '';
+      if (input) input.value = '';
+      currentQuery = '';
+      cursor = 0;
+    }
+
+    // 全局快捷键
+    document.addEventListener('keydown', (e) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        root.classList.contains('open') ? close() : open();
+      } else if (e.key === 'Escape' && root.classList.contains('open')) {
+        close();
+      } else if (root.classList.contains('open') && (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter')) {
+        if (!currentResults.length) return;
+        e.preventDefault();
+        if (e.key === 'ArrowDown') cursor = Math.min(currentResults.length - 1, cursor + 1);
+        if (e.key === 'ArrowUp') cursor = Math.max(0, cursor - 1);
+        if (e.key === 'Enter') {
+          const pick = currentResults[cursor];
+          if (pick) window.location.href = pick.url;
+          return;
+        }
+        paint();
+      }
+    });
+
+    // 公开给别的按钮（比如 hero 的 ⌘K 按钮）
+    window.__openCmdK = open;
+
+    root.querySelectorAll('[data-close]').forEach((el) => {
+      el.addEventListener('click', close);
+    });
+
+    tabs.forEach((t) => {
+      t.addEventListener('click', () => {
+        tabs.forEach((x) => x.classList.toggle('active', x === t));
+        currentTab = t.getAttribute('data-tab') || 'all';
+        cursor = 0;
+        render();
+      });
+    });
+
+    input?.addEventListener('input', () => {
+      currentQuery = (input.value || '').trim();
+      cursor = 0;
+      render();
+    });
+
+    function scorePost(p, q) {
+      if (!q) return 1;
+      const lc = q.toLowerCase();
+      const title = p.title.toLowerCase();
+      const excerpt = p.excerpt.toLowerCase();
+      const tags = p.tags.join(' ').toLowerCase();
+      let s = 0;
+      if (title.includes(lc)) s += 20;
+      if (tags.includes(lc)) s += 12;
+      if (excerpt.includes(lc)) s += 6;
+      return s;
+    }
+
+    function filter() {
+      const q = currentQuery.toLowerCase();
+      const out = [];
+      // 主题（优先匹配）
+      if (currentTab === 'all' || currentTab === 'tags') {
+        for (const t of tags) {
+          if (!q || t.name.toLowerCase().includes(q)) {
+            out.push({
+              kind: 'tag',
+              title: t.name,
+              hint: `${t.count} 篇`,
+              url: `${location.pathname.includes('/archive') ? '' : ''}#tag=${encodeURIComponent(t.name)}`,
+              // 主题暂时只高亮文章列表中匹配的
+              emoji: '🏷️',
+            });
+          }
+        }
+      }
+      // 文章
+      if (currentTab === 'all' || currentTab === 'posts') {
+        const scored = index
+          .map((p) => ({ post: p, score: scorePost(p, q) }))
+          .filter((x) => x.score > 0)
+          .sort((a, b) => b.score - a.score);
+        for (const { post } of scored) {
+          out.push({
+            kind: 'post',
+            title: post.title,
+            hint: `${post.date} · 🕒 ${post.minutes} 分钟${post.tags[0] ? ' · ' + post.tags[0] : ''}`,
+            url: post.url,
+            emoji: post.emoji,
+            excerpt: post.excerpt,
+          });
+        }
+      }
+      // 导航
+      if (currentTab === 'all' || currentTab === 'nav') {
+        for (const n of navItems) {
+          if (!q || n.label.toLowerCase().includes(q)) {
+            out.push({ kind: 'nav', title: n.label, url: n.url, emoji: '→' });
+          }
+        }
+      }
+      return out.slice(0, currentTab === 'all' ? 10 : 30);
+    }
+
+    function render() {
+      currentResults = filter();
+      paint();
+    }
+
+    function paint() {
+      if (!results) return;
+      if (!currentResults.length) {
+        results.innerHTML = `<div class="cmdk-empty">没找到匹配项${currentQuery ? '：' + currentQuery : ''}</div>`;
+        return;
+      }
+      results.innerHTML = currentResults.map((r, i) => `
+        <a class="cmdk-item ${i === cursor ? 'active' : ''}" href="${r.url}" data-idx="${i}">
+          <span class="cmdk-item-icon" aria-hidden="true">${r.emoji}</span>
+          <div class="cmdk-item-body">
+            <div class="cmdk-item-title">${r.title}</div>
+            ${r.excerpt ? `<div class="cmdk-item-excerpt">${r.excerpt}</div>` : ''}
+            ${r.hint ? `<div class="cmdk-item-hint">${r.hint}</div>` : ''}
+          </div>
+        </a>
+      `).join('');
+      // 鼠标悬停时同步 cursor
+      results.querySelectorAll('.cmdk-item').forEach((el) => {
+        el.addEventListener('mouseenter', () => {
+          const i = Number(el.getAttribute('data-idx'));
+          if (Number.isFinite(i) && i !== cursor) { cursor = i; paint(); }
+        });
+      });
+      // 自动滚动当前项可见
+      const active = results.querySelector('.cmdk-item.active');
+      if (active) active.scrollIntoView({ block: 'nearest' });
+    }
+  })();
+</script>

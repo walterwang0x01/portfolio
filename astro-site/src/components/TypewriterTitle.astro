@@ -1,0 +1,44 @@
+---
+// 轮播的打字机短语，点缀在 Hero 副标题里。纯 DOM 操作，无 JS 库。
+interface Props {
+  phrases: string[];
+}
+const { phrases } = Astro.props;
+---
+<span class="typewriter" data-phrases={JSON.stringify(phrases)}>
+  <span class="typewriter-text"></span>
+  <span class="typewriter-caret" aria-hidden="true">|</span>
+</span>
+<script is:inline>
+  (function () {
+    const el = document.querySelector('.typewriter');
+    if (!el) return;
+    const textEl = el.querySelector('.typewriter-text');
+    if (!textEl) return;
+    const phrases = JSON.parse(el.getAttribute('data-phrases') || '[]');
+    if (!Array.isArray(phrases) || phrases.length === 0) return;
+
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      textEl.textContent = phrases[0];
+      return;
+    }
+
+    let phraseIdx = 0, charIdx = 0, deleting = false;
+    function tick() {
+      const full = phrases[phraseIdx];
+      const next = deleting ? full.slice(0, --charIdx) : full.slice(0, ++charIdx);
+      textEl.textContent = next;
+
+      let delay = deleting ? 40 : 85;
+      if (!deleting && charIdx === full.length) { delay = 1800; deleting = true; }
+      else if (deleting && charIdx === 0) {
+        deleting = false;
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+        delay = 400;
+      }
+      setTimeout(tick, delay);
+    }
+    tick();
+  })();
+</script>

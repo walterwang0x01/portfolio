@@ -16,11 +16,10 @@ interface Post {
 
 interface Props {
   post: Post;
-  featured?: boolean;
   maxTags?: number;
 }
 
-const { post, featured = false, maxTags = 3 } = Astro.props;
+const { post, maxTags = 2 } = Astro.props;
 const BASE = import.meta.env.BASE_URL;
 
 const tag0 = post.data.tags[0] ?? '';
@@ -28,38 +27,34 @@ const dateStr = post.data.date.toISOString().slice(0, 10);
 const emoji = pickEmoji(post.data.tags, post.data.emoji);
 const gradient = pickGradient(tag0 || post.slug);
 const minutes = readingMinutes(post.body);
-const coverStyle = post.data.cover
+const thumbStyle = post.data.cover
   ? `background-image: url('${post.data.cover}')`
   : `background-image: ${gradient}`;
 const tagsShown = post.data.tags.slice(0, maxTags);
 ---
 <a
-  class={`post-card ${featured ? 'post-card--featured' : ''}`}
+  class="post-row"
   href={`${BASE}posts/${post.slug}/`}
   data-title={post.data.title}
   data-excerpt={post.data.excerpt}
   data-tags={post.data.tags.join(',')}
 >
-  <div class={`cover ${featured ? 'cover--featured' : ''}`} style={coverStyle}>
-    {!post.data.cover && <span class="cover-emoji" aria-hidden="true">{emoji}</span>}
-    {featured && <span class="cover-badge cover-badge--featured">📌 编辑推荐</span>}
+  <div class="post-row-thumb" style={thumbStyle}>
+    {!post.data.cover && <span class="post-row-emoji" aria-hidden="true">{emoji}</span>}
   </div>
-  <div class="post-card-body">
-    <h2>{post.data.title}</h2>
-    {featured && (
-      <div class="featured-intro">
-        <span aria-hidden="true">✨</span>
-        <span>最新力作 · 推荐从这篇开始</span>
-      </div>
-    )}
-    <div class="meta">
+  <div class="post-row-body">
+    <h3 class="post-row-title">{post.data.title}</h3>
+    <p class="post-row-excerpt">{post.data.excerpt}</p>
+    <div class="post-row-meta">
       <time datetime={dateStr}>{dateStr}</time>
-      <span aria-hidden="true">·</span>
+      <span class="dot" aria-hidden="true">·</span>
       <span>🕒 {minutes} 分钟</span>
-    </div>
-    <p class="excerpt">{post.data.excerpt}</p>
-    <div class="row card-tags">
-      {tagsShown.map((t) => <span class="badge" data-color={pickTagColorIndex(t)}>{t}</span>)}
+      {tagsShown.map((t) => (
+        <>
+          <span class="dot" aria-hidden="true">·</span>
+          <span class="badge" data-color={pickTagColorIndex(t)}>{t}</span>
+        </>
+      ))}
     </div>
   </div>
 </a>

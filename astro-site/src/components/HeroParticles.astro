@@ -1,0 +1,94 @@
+---
+// Hero 背景粒子动效。纯 canvas，无依赖，~80 行 JS，尊重 prefers-reduced-motion。
+---
+<canvas class="hero-particles" aria-hidden="true"></canvas>
+<script is:inline>
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const canvas = document.querySelector('.hero-particles');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = 0, height = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let particles = [];
+    const COUNT_FACTOR = 0.00008; // 每平方像素粒子数
+    const MAX_PARTICLES = 60;
+    const LINK_DISTANCE = 140;
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.min(MAX_PARTICLES, Math.max(20, Math.floor(width * height * COUNT_FACTOR)));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        r: Math.random() * 1.2 + 0.6,
+      }));
+    }
+
+    function readColor() {
+      // 根据主题读取主色，暗色更高对比
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      return dark ? { dot: '148, 163, 184', line: '96, 165, 250' }
+                  : { dot: '100, 116, 139', line: '37, 99, 235' };
+    }
+
+    function tick() {
+      if (!width || !height) return;
+      ctx.clearRect(0, 0, width, height);
+      const { dot, line } = readColor();
+      for (const p of particles) {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+        ctx.fillStyle = `rgba(${dot}, 0.55)`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < LINK_DISTANCE) {
+            const alpha = (1 - dist / LINK_DISTANCE) * 0.35;
+            ctx.strokeStyle = `rgba(${line}, ${alpha})`;
+            ctx.lineWidth = 0.6;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    let rafId = 0;
+    let observer;
+
+    function start() {
+      if (!rafId) rafId = requestAnimationFrame(tick);
+    }
+    function stop() {
+      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    }
+
+    resize();
+    start();
+    window.addEventListener('resize', resize);
+
+    // 页面不可见时停 RAF，省电
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else start();
+    });
+  })();
+</script>

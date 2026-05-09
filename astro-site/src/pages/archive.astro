@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCard from '@/components/PostCard.astro';
+import SubscribeCTA from '@/components/SubscribeCTA.astro';
+
+const all = await getCollection('blog', ({ data }) => !data.draft);
+const posts = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// 按年份分组
+const grouped = new Map<number, typeof posts>();
+for (const p of posts) {
+  const y = p.data.date.getFullYear();
+  if (!grouped.has(y)) grouped.set(y, []);
+  grouped.get(y)!.push(p);
+}
+const years = [...grouped.keys()].sort((a, b) => b - a);
+---
+<BaseLayout title="归档 — Walter's Tech Blog" activeNav="blog">
+  <section class="container-narrow">
+    <header class="page-hero">
+      <h1>📚 文章归档</h1>
+      <p>{posts.length} 篇文章 · 按年份分组 · 按 <kbd class="kbd">⌘K</kbd> 搜索</p>
+    </header>
+
+    {years.map((y) => (
+      <div class="year-group">
+        <h2 class="year-label">{y} · {grouped.get(y)!.length} 篇</h2>
+        <div class="post-list">
+          {grouped.get(y)!.map((p) => <PostCard post={p} />)}
+        </div>
+      </div>
+    ))}
+
+    <SubscribeCTA />
+  </section>
+</BaseLayout>

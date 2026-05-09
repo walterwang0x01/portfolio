@@ -2,6 +2,7 @@
 import '@/styles/global.css';
 import Analytics from '@/components/Analytics.astro';
 import BackToTop from '@/components/BackToTop.astro';
+import CommandPalette from '@/components/CommandPalette.astro';
 
 interface Props {
   title: string;
@@ -56,6 +57,10 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
           <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
         </ul>
         <div class="navbar-actions">
+          <button class="cmdk-trigger" id="cmdkTrigger" aria-label="搜索" title="搜索 (⌘K)">
+            <span aria-hidden="true">🔎</span>
+            <kbd class="kbd">⌘K</kbd>
+          </button>
           <button class="menu-toggle" id="menuToggle" aria-label="打开导航菜单" aria-expanded="false">☰</button>
           <button class="theme-toggle" id="themeToggle" aria-label="切换主题">🌙</button>
         </div>
@@ -74,6 +79,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
       </p>
     </footer>
     <BackToTop />
+    <CommandPalette />
     <script>
       const toggle = document.getElementById('themeToggle');
       const root = document.documentElement;
@@ -90,6 +96,11 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
         const open = mobileNav?.classList.toggle('open');
         menuBtn.setAttribute('aria-expanded', String(!!open));
       });
+      // Cmd+K trigger buttons
+      const cmdkTrigger = document.getElementById('cmdkTrigger');
+      cmdkTrigger?.addEventListener('click', () => (window as any).__openCmdK?.());
+      const heroCmdK = document.getElementById('openCmdK');
+      heroCmdK?.addEventListener('click', () => (window as any).__openCmdK?.());
     </script>
   </body>
 </html>
