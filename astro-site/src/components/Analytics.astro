@@ -7,7 +7,8 @@
     s.src = '//sdk.51.la/js-sdk-pro.min.js';
     s.charset = 'UTF-8';
     s.onload = function () {
-      LA.init({ id: '3PeZ4JAmjD4FHOcx', ck: '3PeZ4JAmjD4FHOcx', autoTrack: true, hashMode: true, screenRecord: true });
+      // 关闭屏幕录制：既省主线程 + 省带宽，也更隐私合规。
+      LA.init({ id: '3PeZ4JAmjD4FHOcx', ck: '3PeZ4JAmjD4FHOcx', autoTrack: true, hashMode: true, screenRecord: false });
     };
     document.head.appendChild(s);
   });

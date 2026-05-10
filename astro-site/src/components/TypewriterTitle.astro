@@ -5,7 +5,7 @@ interface Props {
 }
 const { phrases } = Astro.props;
 ---
-<span class="typewriter" data-phrases={JSON.stringify(phrases)}>
+<span class="typewriter" data-phrases={JSON.stringify(phrases)} aria-live="off">
   <span class="typewriter-text"></span>
   <span class="typewriter-caret" aria-hidden="true">|</span>
 </span>
@@ -25,7 +25,11 @@ const { phrases } = Astro.props;
     }
 
     let phraseIdx = 0, charIdx = 0, deleting = false;
+    let timer = 0;
+    let running = true;
+
     function tick() {
+      if (!running) return;
       const full = phrases[phraseIdx];
       const next = deleting ? full.slice(0, --charIdx) : full.slice(0, ++charIdx);
       textEl.textContent = next;
@@ -37,8 +41,32 @@ const { phrases } = Astro.props;
         phraseIdx = (phraseIdx + 1) % phrases.length;
         delay = 400;
       }
-      setTimeout(tick, delay);
+      timer = setTimeout(tick, delay);
     }
+
+    function start() {
+      if (running) return;
+      running = true;
+      tick();
+    }
+    function stop() {
+      running = false;
+      if (timer) { clearTimeout(timer); timer = 0; }
+    }
+
+    // hero 离开视口就停，回来再继续；页面不可见也停
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !document.hidden) start(); else stop();
+        }
+      }, { threshold: 0 });
+      io.observe(el);
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop(); else start();
+    });
+
     tick();
   })();
 </script>

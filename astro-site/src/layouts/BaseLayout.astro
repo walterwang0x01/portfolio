@@ -26,6 +26,11 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
     <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title="RSS" href={`${BASE}rss.xml`} />
+    <!-- 第三方预连接：提前完成 DNS+TLS，省 100-300ms -->
+    <link rel="preconnect" href="https://giscus.app" crossorigin />
+    <link rel="preconnect" href="https://github.com" crossorigin />
+    <link rel="dns-prefetch" href="https://sdk.51.la" />
+    <link rel="dns-prefetch" href="https://busuanzi.ibruce.info" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

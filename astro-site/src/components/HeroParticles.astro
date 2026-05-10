@@ -83,12 +83,24 @@
     }
 
     resize();
-    start();
     window.addEventListener('resize', resize);
 
-    // 页面不可见时停 RAF，省电
+    // 页面不可见或 hero 离开视口时暂停 RAF，省 CPU / 电量
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stop(); else start();
+      if (document.hidden) stop(); else if (inView) start();
     });
+
+    let inView = true;
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          inView = e.isIntersecting;
+          if (inView && !document.hidden) start(); else stop();
+        }
+      }, { threshold: 0 });
+      io.observe(canvas);
+    } else {
+      start();
+    }
   })();
 </script>

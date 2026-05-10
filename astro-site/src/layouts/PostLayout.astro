@@ -17,8 +17,33 @@ interface Props {
 const { title, date, tags, excerpt, minutes, related = [], ogImage } = Astro.props;
 const dateStr = date.toISOString().slice(0, 10);
 const BASE = import.meta.env.BASE_URL;
+
+// BlogPosting JSON-LD，提升 Google 富媒体卡概率
+const siteOrigin = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const absoluteOg = ogImage ? new URL(ogImage, Astro.site).toString() : undefined;
+const postingLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description: excerpt,
+  datePublished: date.toISOString(),
+  dateModified: date.toISOString(),
+  inLanguage: 'zh-CN',
+  keywords: tags.join(', '),
+  url: canonicalUrl,
+  mainEntityOfPage: canonicalUrl,
+  ...(absoluteOg ? { image: absoluteOg } : {}),
+  author: { '@type': 'Person', name: 'Walter', url: 'https://github.com/WalterHandsome' },
+  publisher: {
+    '@type': 'Person',
+    name: 'Walter',
+    url: siteOrigin + BASE,
+  },
+};
 ---
 <BaseLayout title={`${title} — Walter's Tech Blog`} description={excerpt} ogImage={ogImage}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(postingLd)} />
   <article class="container-narrow">
     <header class="post-header">
       <a href={BASE} class="back-link">← 返回博客列表</a>
@@ -33,7 +58,7 @@ const BASE = import.meta.env.BASE_URL;
     <div class="post-body"><slot /></div>
     <RelatedPosts posts={related} />
     <hr />
-    <div id="comments"></div>
+    <div id="comments" data-giscus style="min-height: 200px;"></div>
   </article>
   <PostEnhance />
   <script is:inline>
@@ -41,24 +66,41 @@ const BASE = import.meta.env.BASE_URL;
       const slug = location.pathname.replace(/^.*\/posts\//, '').replace(/\/$/, '');
       const container = document.getElementById('comments');
       if (!container) return;
-      container.innerHTML = '<h3 class="comments-heading">💬 评论</h3>';
-      const s = document.createElement('script');
-      s.src = 'https://giscus.app/client.js';
-      s.setAttribute('data-repo', 'WalterHandsome/portfolio');
-      s.setAttribute('data-repo-id', 'R_kgDOSFA_HQ');
-      s.setAttribute('data-category', 'Announcements');
-      s.setAttribute('data-category-id', 'DIC_kwDOSFA_Hc4C7Q-z');
-      s.setAttribute('data-mapping', 'specific');
-      s.setAttribute('data-term', slug);
-      s.setAttribute('data-strict', '0');
-      s.setAttribute('data-reactions-enabled', '1');
-      s.setAttribute('data-emit-metadata', '0');
-      s.setAttribute('data-input-position', 'top');
-      s.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-      s.setAttribute('data-lang', 'zh-CN');
-      s.setAttribute('crossorigin', 'anonymous');
-      s.async = true;
-      container.appendChild(s);
+      let loaded = false;
+      function loadGiscus() {
+        if (loaded) return;
+        loaded = true;
+        container.innerHTML = '<h3 class="comments-heading">💬 评论</h3>';
+        const s = document.createElement('script');
+        s.src = 'https://giscus.app/client.js';
+        s.setAttribute('data-repo', 'WalterHandsome/portfolio');
+        s.setAttribute('data-repo-id', 'R_kgDOSFA_HQ');
+        s.setAttribute('data-category', 'Announcements');
+        s.setAttribute('data-category-id', 'DIC_kwDOSFA_Hc4C7Q-z');
+        s.setAttribute('data-mapping', 'specific');
+        s.setAttribute('data-term', slug);
+        s.setAttribute('data-strict', '0');
+        s.setAttribute('data-reactions-enabled', '1');
+        s.setAttribute('data-emit-metadata', '0');
+        s.setAttribute('data-input-position', 'top');
+        s.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+        s.setAttribute('data-lang', 'zh-CN');
+        s.setAttribute('crossorigin', 'anonymous');
+        s.async = true;
+        container.appendChild(s);
+      }
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            loadGiscus();
+            io.disconnect();
+          }
+        }, { rootMargin: '400px 0px' });
+        io.observe(container);
+      } else {
+        // 老浏览器兜底：延迟 2s 再加载，不阻塞首屏
+        setTimeout(loadGiscus, 2000);
+      }
     })();
   </script>
 </BaseLayout>

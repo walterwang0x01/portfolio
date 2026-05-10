@@ -48,8 +48,8 @@ export const { getStaticPaths, GET } = await OGImageRoute({
       },
     },
     fonts: [
-      './public/fonts/NotoSansSC-Bold.otf',
-      './public/fonts/NotoSansSC-Regular.otf',
+      './build-assets/fonts/NotoSansSC-Bold.otf',
+      './build-assets/fonts/NotoSansSC-Regular.otf',
     ],
   }),
 });
