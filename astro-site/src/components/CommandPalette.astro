@@ -159,8 +159,11 @@ const navItems = [
       const out = [];
       // 主题（优先匹配）
       if (currentTab === 'all' || currentTab === 'tags') {
+        let tagCount = 0;
+        const allTagLimit = 5; // "全部" 下只显示 top 5 个主题
         for (const t of tags) {
           if (!q || t.name.toLowerCase().includes(q)) {
+            if (currentTab === 'all' && tagCount >= allTagLimit) break;
             out.push({
               kind: 'tag',
               title: t.name,
@@ -168,6 +171,7 @@ const navItems = [
               url: `${BASE}archive/?tag=${encodeURIComponent(t.name)}`,
               emoji: '🏷️',
             });
+            tagCount++;
           }
         }
       }
@@ -196,7 +200,7 @@ const navItems = [
           }
         }
       }
-      return out.slice(0, currentTab === 'all' ? 10 : 30);
+      return out.slice(0, currentTab === 'all' ? 10 : currentTab === 'tags' ? 200 : 30);
     }
 
     function render() {
@@ -210,6 +214,28 @@ const navItems = [
         results.innerHTML = `<div class="cmdk-empty">没找到匹配项${currentQuery ? '：' + currentQuery : ''}</div>`;
         return;
       }
+
+      // 纯主题 tab 下用紧凑 chip 网格，省空间
+      if (currentTab === 'tags') {
+        results.innerHTML = `<div class="cmdk-tag-grid">${
+          currentResults.map((r, i) => `
+            <a class="cmdk-tag-chip ${i === cursor ? 'active' : ''}" href="${r.url}" data-idx="${i}">
+              <span class="cmdk-tag-name">${r.title}</span>
+              <span class="cmdk-tag-count">${r.hint || ''}</span>
+            </a>
+          `).join('')
+        }</div>`;
+        results.querySelectorAll('.cmdk-tag-chip').forEach((el) => {
+          el.addEventListener('mouseenter', () => {
+            const i = Number(el.getAttribute('data-idx'));
+            if (Number.isFinite(i) && i !== cursor) { cursor = i; paint(); }
+          });
+        });
+        const active = results.querySelector('.cmdk-tag-chip.active');
+        if (active) active.scrollIntoView({ block: 'nearest' });
+        return;
+      }
+
       results.innerHTML = currentResults.map((r, i) => `
         <a class="cmdk-item ${i === cursor ? 'active' : ''}" href="${r.url}" data-idx="${i}">
           <span class="cmdk-item-icon" aria-hidden="true">${r.emoji}</span>

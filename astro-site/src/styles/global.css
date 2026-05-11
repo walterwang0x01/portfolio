@@ -1887,6 +1887,58 @@ button.badge.active {
   padding: 40px 16px;
   font-size: var(--fs-sm);
 }
+
+/* 主题 tab 下的紧凑 chip 网格 */
+.cmdk-tag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px;
+  padding: 4px;
+}
+.cmdk-tag-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.2;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+  min-width: 0;
+}
+.cmdk-tag-chip:hover,
+.cmdk-tag-chip.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.cmdk-tag-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cmdk-tag-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.cmdk-tag-chip.active .cmdk-tag-count { color: var(--primary); }
+@media (max-width: 480px) {
+  .cmdk-tag-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 5px;
+  }
+  .cmdk-tag-chip { padding: 6px 10px; font-size: 12px; }
+}
 .cmdk-footer {
   display: flex;
   gap: 16px;
