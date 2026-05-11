@@ -71,8 +71,8 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
         </div>
       </div>
       <ul class="mobile-nav" id="mobileNav">
-        <li><a href={BASE}>博客</a></li>
-        <li><a href={`${BASE}briefing/`}>简报</a></li>
+        <li><a href={BASE} class={activeNav === 'blog' ? 'active' : ''}>博客</a></li>
+        <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
         <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
       </ul>
     </nav>
@@ -100,6 +100,26 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
       menuBtn?.addEventListener('click', () => {
         const open = mobileNav?.classList.toggle('open');
         menuBtn.setAttribute('aria-expanded', String(!!open));
+        menuBtn.textContent = open ? '✕' : '☰';
+      });
+      // 点击移动菜单链接后自动关闭
+      mobileNav?.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement | null;
+        if (target?.closest('a')) {
+          mobileNav.classList.remove('open');
+          menuBtn?.setAttribute('aria-expanded', 'false');
+          if (menuBtn) menuBtn.textContent = '☰';
+        }
+      });
+      // 点击菜单外部自动关闭（避免手机端要点两次才能关）
+      document.addEventListener('click', (e) => {
+        if (!mobileNav?.classList.contains('open')) return;
+        const t = e.target as HTMLElement | null;
+        if (t && !mobileNav.contains(t) && !menuBtn?.contains(t)) {
+          mobileNav.classList.remove('open');
+          menuBtn?.setAttribute('aria-expanded', 'false');
+          if (menuBtn) menuBtn.textContent = '☰';
+        }
       });
       // Cmd+K trigger buttons
       const cmdkTrigger = document.getElementById('cmdkTrigger');

@@ -181,18 +181,52 @@ button { font: inherit; }
 
 .mobile-nav {
   display: none; list-style: none;
-  padding: var(--space-2) var(--container-pad) var(--space-4);
+  padding: var(--space-2) var(--container-pad);
   border-top: 1px solid var(--border-color);
   background: var(--bg-primary);
 }
 .mobile-nav.open { display: block; }
-.mobile-nav li { padding: var(--space-3) 0; border-bottom: 1px solid var(--border-color); }
+.mobile-nav li { border-bottom: 1px solid var(--border-color); }
 .mobile-nav li:last-child { border-bottom: none; }
-.mobile-nav a { color: var(--text-secondary); font-size: var(--fs-md); font-weight: 500; }
+.mobile-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 4px;
+  color: var(--text-secondary);
+  font-size: var(--fs-md);
+  font-weight: 500;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--transition), background var(--transition);
+  border-radius: var(--radius-sm);
+}
+.mobile-nav a:hover,
+.mobile-nav a:active {
+  color: var(--primary);
+  background: var(--bg-secondary);
+}
+.mobile-nav a.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.mobile-nav a.active::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 18px;
+  margin-right: 10px;
+  background: var(--primary);
+  border-radius: 2px;
+}
 
 @media (max-width: 768px) {
   .navbar-links { display: none; }
   .menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  .navbar-inner { gap: var(--space-2); padding: var(--space-2) var(--container-pad); }
+  .navbar-brand { font-size: var(--fs-sm); }
+  .navbar-actions { gap: 6px; }
+  .cmdk-trigger { padding: 6px 8px; }
 }
 
 /* ============================================================
@@ -798,17 +832,18 @@ footer .visit-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
 }
-@media (max-width: 720px) {
+@media (max-width: 960px) {
   .related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 480px) {
-  .related-grid { grid-template-columns: 1fr; }
+@media (max-width: 640px) {
+  .related-grid { grid-template-columns: 1fr; gap: var(--space-3); }
 }
 .related-card {
   padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  margin-bottom: 0;
 }
 .related-card .cover {
   aspect-ratio: 16 / 9;
@@ -828,6 +863,8 @@ footer .visit-stats {
 .related-card .post-card-body {
   padding: var(--space-3) var(--space-4) var(--space-4);
   gap: 6px;
+  display: flex;
+  flex-direction: column;
 }
 .related-heading {
   font-size: var(--fs-md);
@@ -841,8 +878,40 @@ footer .visit-stats {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.related-card .meta { font-size: var(--fs-xs); }
+.related-card .meta { font-size: var(--fs-xs); margin-bottom: 0; }
 .related-card .card-tags { margin-top: auto; padding-top: var(--space-2); }
+
+/* 手机端：横向紧凑卡片，信息密度更高 */
+@media (max-width: 640px) {
+  .related-card {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+  .related-card .cover {
+    aspect-ratio: auto;
+    width: 96px;
+    height: 100%;
+    min-height: 96px;
+  }
+  .related-card .cover-emoji { font-size: 1.75rem; }
+  .related-card .post-card-body {
+    padding: var(--space-3);
+    min-width: 0;
+  }
+  .related-heading {
+    font-size: var(--fs-sm);
+    -webkit-line-clamp: 2;
+  }
+  .related-card .card-tags {
+    padding-top: var(--space-1);
+  }
+  .related-card .card-tags .badge {
+    font-size: 11px;
+    padding: 2px 7px;
+  }
+}
 
 /* ============================================================
    Author card (collapsible <details>)

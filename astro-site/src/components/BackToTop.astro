@@ -12,6 +12,16 @@
   }
   #backToTop.visible { opacity: 1; pointer-events: auto; }
   #backToTop:hover { transform: translateY(-2px); }
+  /* 手机端挪到左下，避免挡住右下角的 AI 气泡 */
+  @media (max-width: 640px) {
+    #backToTop {
+      right: auto;
+      left: 16px;
+      bottom: 16px;
+      width: 36px; height: 36px;
+      font-size: 16px;
+    }
+  }
 </style>
 <script>
   const btn = document.getElementById('backToTop');
