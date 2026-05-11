@@ -257,7 +257,20 @@ button { font: inherit; }
   margin: 0 4px 4px 0;
   line-height: 1.6;
   border: 1px solid transparent;
-  transition: background var(--transition), border-color var(--transition);
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+.badge[data-tag] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.badge[data-tag]:hover {
+  filter: brightness(0.94);
+  transform: translateY(-1px);
+}
+[data-theme="dark"] .badge[data-tag]:hover { filter: brightness(1.1); }
+.badge[data-tag]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 button.badge {
   cursor: pointer; border: 1px solid transparent;

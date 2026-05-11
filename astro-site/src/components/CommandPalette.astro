@@ -36,7 +36,7 @@ const navItems = [
   { label: '⭐ GitHub', url: 'https://github.com/WalterHandsome', kind: 'nav' },
 ];
 ---
-<div class="cmdk" id="cmdk" aria-hidden="true" role="dialog" aria-label="命令面板" data-index={JSON.stringify(index)} data-tags={JSON.stringify(tags)} data-nav={JSON.stringify(navItems)}>
+<div class="cmdk" id="cmdk" aria-hidden="true" role="dialog" aria-label="命令面板" data-index={JSON.stringify(index)} data-tags={JSON.stringify(tags)} data-nav={JSON.stringify(navItems)} data-base={BASE}>
   <div class="cmdk-backdrop" data-close></div>
   <div class="cmdk-panel" role="document">
     <div class="cmdk-input-wrap">
@@ -75,6 +75,7 @@ const navItems = [
     const index = JSON.parse(root.getAttribute('data-index') || '[]');
     const tags = JSON.parse(root.getAttribute('data-tags') || '[]');
     const navItems = JSON.parse(root.getAttribute('data-nav') || '[]');
+    const BASE = root.getAttribute('data-base') || '/';
     let currentTab = 'all';
     let currentQuery = '';
     let cursor = 0;
@@ -164,8 +165,7 @@ const navItems = [
               kind: 'tag',
               title: t.name,
               hint: `${t.count} 篇`,
-              url: `${location.pathname.includes('/archive') ? '' : ''}#tag=${encodeURIComponent(t.name)}`,
-              // 主题暂时只高亮文章列表中匹配的
+              url: `${BASE}archive/?tag=${encodeURIComponent(t.name)}`,
               emoji: '🏷️',
             });
           }

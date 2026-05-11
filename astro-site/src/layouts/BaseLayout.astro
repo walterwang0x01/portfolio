@@ -17,7 +17,7 @@ const BASE = import.meta.env.BASE_URL;
 const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined;
 ---
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-base={BASE}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -126,6 +126,30 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
       cmdkTrigger?.addEventListener('click', () => (window as any).__openCmdK?.());
       const heroCmdK = document.getElementById('openCmdK');
       heroCmdK?.addEventListener('click', () => (window as any).__openCmdK?.());
+
+      // 全局 tag 点击 → 跳转到归档筛选页
+      const BASE_URL = document.documentElement.dataset.base || '/portfolio/';
+      document.addEventListener('click', (e) => {
+        const t = e.target as HTMLElement | null;
+        const badge = t?.closest?.('[data-tag]') as HTMLElement | null;
+        if (!badge) return;
+        // 阻止触发外层 <a> 的跳转（如 PostCard 整卡链接）
+        e.preventDefault();
+        e.stopPropagation();
+        const tag = badge.getAttribute('data-tag') || '';
+        if (tag) {
+          location.href = `${BASE_URL}archive/?tag=${encodeURIComponent(tag)}`;
+        }
+      }, true); // capture 阶段，在 <a> 默认跳转之前拿到
+      // 键盘可达（Enter/Space 触发）
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const t = e.target as HTMLElement | null;
+        if (!t?.matches?.('[data-tag]')) return;
+        e.preventDefault();
+        const tag = t.getAttribute('data-tag') || '';
+        if (tag) location.href = `${BASE_URL}archive/?tag=${encodeURIComponent(tag)}`;
+      });
     </script>
   </body>
 </html>

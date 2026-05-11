@@ -23,15 +23,90 @@ const years = [...grouped.keys()].sort((a, b) => b - a);
       <p>{posts.length} 篇文章 · 按年份分组 · 按 <kbd class="kbd">⌘K</kbd> 搜索</p>
     </header>
 
+    <div id="tagFilterStatus" class="filter-status" hidden>
+      <div class="filter-status-text">
+        标签：<b id="tagFilterName"></b> · <span id="tagFilterCount">0</span> 篇
+      </div>
+      <button type="button" class="filter-reset" id="tagFilterReset">清除筛选 ✕</button>
+    </div>
+
+    <div id="archiveGroups">
     {years.map((y) => (
-      <div class="year-group">
-        <h2 class="year-label">{y} · {grouped.get(y)!.length} 篇</h2>
+      <div class="year-group" data-year={y}>
+        <h2 class="year-label">{y} · <span class="year-count">{grouped.get(y)!.length}</span> 篇</h2>
         <div class="post-list">
           {grouped.get(y)!.map((p) => <PostCard post={p} />)}
         </div>
       </div>
     ))}
+    </div>
+
+    <div id="archiveEmpty" class="empty" hidden>
+      <p>没有匹配此标签的文章。</p>
+      <button type="button" class="empty-reset" id="archiveEmptyReset">查看全部</button>
+    </div>
 
     <SubscribeCTA />
   </section>
+  <script is:inline>
+    (function () {
+      const url = new URL(location.href);
+      const target = url.searchParams.get('tag');
+      const status = document.getElementById('tagFilterStatus');
+      const nameEl = document.getElementById('tagFilterName');
+      const countEl = document.getElementById('tagFilterCount');
+      const reset = document.getElementById('tagFilterReset');
+      const emptyEl = document.getElementById('archiveEmpty');
+      const emptyReset = document.getElementById('archiveEmptyReset');
+      const groups = Array.from(document.querySelectorAll('#archiveGroups .year-group'));
+
+      function apply(tag) {
+        if (!tag) {
+          status.hidden = true;
+          emptyEl.hidden = true;
+          groups.forEach((g) => {
+            g.hidden = false;
+            g.querySelectorAll('.post-row').forEach((a) => { a.hidden = false; });
+            // 恢复年份计数
+            const total = g.querySelectorAll('.post-row').length;
+            const countSpan = g.querySelector('.year-count');
+            if (countSpan) countSpan.textContent = String(total);
+          });
+          return;
+        }
+        let total = 0;
+        groups.forEach((g) => {
+          const items = Array.from(g.querySelectorAll('.post-row'));
+          let visible = 0;
+          items.forEach((a) => {
+            const tags = (a.getAttribute('data-tags') || '').split(',').map((s) => s.trim());
+            const match = tags.includes(tag);
+            a.hidden = !match;
+            if (match) visible++;
+          });
+          g.hidden = visible === 0;
+          const countSpan = g.querySelector('.year-count');
+          if (countSpan) countSpan.textContent = String(visible);
+          total += visible;
+        });
+        nameEl.textContent = tag;
+        countEl.textContent = String(total);
+        status.hidden = false;
+        emptyEl.hidden = total > 0;
+      }
+
+      reset?.addEventListener('click', () => {
+        url.searchParams.delete('tag');
+        history.replaceState(null, '', url.toString());
+        apply(null);
+      });
+      emptyReset?.addEventListener('click', () => {
+        url.searchParams.delete('tag');
+        history.replaceState(null, '', url.toString());
+        apply(null);
+      });
+
+      apply(target);
+    })();
+  </script>
 </BaseLayout>

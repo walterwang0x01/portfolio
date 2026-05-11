@@ -39,7 +39,7 @@ const cards = posts.map((p) => {
               <span>🕒 {c.minutes} 分钟</span>
             </div>
             <div class="row card-tags">
-              {c.tags.map((t) => <span class="badge" data-color={pickTagColorIndex(t)}>{t}</span>)}
+              {c.tags.map((t) => <span class="badge" data-color={pickTagColorIndex(t)} data-tag={t} role="link" tabindex="0" title={`查看 “${t}” 相关文章`}>{t}</span>)}
             </div>
           </div>
         </a>

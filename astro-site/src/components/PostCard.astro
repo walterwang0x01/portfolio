@@ -52,7 +52,7 @@ const tagsShown = post.data.tags.slice(0, maxTags);
       {tagsShown.map((t) => (
         <>
           <span class="dot" aria-hidden="true">·</span>
-          <span class="badge" data-color={pickTagColorIndex(t)}>{t}</span>
+          <span class="badge" data-color={pickTagColorIndex(t)} data-tag={t} role="link" tabindex="0" title={`查看 “${t}” 相关文章`}>{t}</span>
         </>
       ))}
     </div>
