@@ -1130,6 +1130,44 @@ footer .visit-stats {
 }
 
 /* ============================================================
+   Tag cloud (archive page)
+   ============================================================ */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 var(--space-5);
+  padding: var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+}
+.tag-chip {
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition),
+              border-color var(--transition), transform var(--transition);
+}
+.tag-chip:hover { transform: translateY(-1px); filter: brightness(0.94); }
+[data-theme="dark"] .tag-chip:hover { filter: brightness(1.1); }
+.tag-chip.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+@media (max-width: 640px) {
+  .tag-cloud {
+    padding: var(--space-2);
+    max-height: 180px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tag-chip { font-size: 12px; padding: 4px 10px; }
+}
+
+/* ============================================================
    Badge color variants — stable color per tag via hash
    ============================================================ */
 .badge[data-color="0"] { background: #eff6ff; color: #1d4ed8; }  /* blue */

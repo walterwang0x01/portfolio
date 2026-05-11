@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PostCard from '@/components/PostCard.astro';
 import SubscribeCTA from '@/components/SubscribeCTA.astro';
+import { pickTagColorIndex } from '@/lib/post-utils';
 
 const all = await getCollection('blog', ({ data }) => !data.draft);
 const posts = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -15,6 +16,14 @@ for (const p of posts) {
   grouped.get(y)!.push(p);
 }
 const years = [...grouped.keys()].sort((a, b) => b - a);
+
+// 收集标签（频次降序）
+const tagCount = new Map<string, number>();
+for (const p of posts) {
+  for (const t of p.data.tags) tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+}
+const tagList = [...tagCount.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 ---
 <BaseLayout title="归档 — Walter's Tech Blog" activeNav="blog">
   <section class="container-narrow">
@@ -22,6 +31,19 @@ const years = [...grouped.keys()].sort((a, b) => b - a);
       <h1>📚 文章归档</h1>
       <p>{posts.length} 篇文章 · 按年份分组 · 按 <kbd class="kbd">⌘K</kbd> 搜索</p>
     </header>
+
+    <div class="tag-cloud" id="tagCloud" aria-label="标签筛选">
+      <button type="button" class="badge tag-chip active" data-filter="__all">全部 · {posts.length}</button>
+      {tagList.map(([name, count]) => (
+        <button
+          type="button"
+          class="badge tag-chip"
+          data-color={pickTagColorIndex(name)}
+          data-filter={name}
+          title={`按 “${name}” 筛选`}
+        >{name} · {count}</button>
+      ))}
+    </div>
 
     <div id="tagFilterStatus" class="filter-status" hidden>
       <div class="filter-status-text">
@@ -50,8 +72,6 @@ const years = [...grouped.keys()].sort((a, b) => b - a);
   </section>
   <script is:inline>
     (function () {
-      const url = new URL(location.href);
-      const target = url.searchParams.get('tag');
       const status = document.getElementById('tagFilterStatus');
       const nameEl = document.getElementById('tagFilterName');
       const countEl = document.getElementById('tagFilterCount');
@@ -59,18 +79,31 @@ const years = [...grouped.keys()].sort((a, b) => b - a);
       const emptyEl = document.getElementById('archiveEmpty');
       const emptyReset = document.getElementById('archiveEmptyReset');
       const groups = Array.from(document.querySelectorAll('#archiveGroups .year-group'));
+      const tagCloud = document.getElementById('tagCloud');
+
+      function show(el) {
+        el.style.removeProperty('display');
+        el.removeAttribute('data-hidden');
+      }
+      function hide(el) {
+        el.style.display = 'none';
+        el.setAttribute('data-hidden', 'true');
+      }
 
       function apply(tag) {
         if (!tag) {
           status.hidden = true;
           emptyEl.hidden = true;
           groups.forEach((g) => {
-            g.hidden = false;
-            g.querySelectorAll('.post-row').forEach((a) => { a.hidden = false; });
-            // 恢复年份计数
-            const total = g.querySelectorAll('.post-row').length;
+            show(g);
+            const rows = g.querySelectorAll('.post-row');
+            rows.forEach((a) => show(a));
             const countSpan = g.querySelector('.year-count');
-            if (countSpan) countSpan.textContent = String(total);
+            if (countSpan) countSpan.textContent = String(rows.length);
+          });
+          // tag cloud active 切换到"全部"
+          tagCloud?.querySelectorAll('[data-filter]').forEach((b) => {
+            b.classList.toggle('active', b.getAttribute('data-filter') === '__all');
           });
           return;
         }
@@ -81,10 +114,9 @@ const years = [...grouped.keys()].sort((a, b) => b - a);
           items.forEach((a) => {
             const tags = (a.getAttribute('data-tags') || '').split(',').map((s) => s.trim());
             const match = tags.includes(tag);
-            a.hidden = !match;
-            if (match) visible++;
+            if (match) { show(a); visible++; } else { hide(a); }
           });
-          g.hidden = visible === 0;
+          if (visible === 0) hide(g); else show(g);
           const countSpan = g.querySelector('.year-count');
           if (countSpan) countSpan.textContent = String(visible);
           total += visible;
@@ -93,20 +125,34 @@ const years = [...grouped.keys()].sort((a, b) => b - a);
         countEl.textContent = String(total);
         status.hidden = false;
         emptyEl.hidden = total > 0;
+        tagCloud?.querySelectorAll('[data-filter]').forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-filter') === tag);
+        });
       }
 
-      reset?.addEventListener('click', () => {
-        url.searchParams.delete('tag');
+      function setTag(tag) {
+        const url = new URL(location.href);
+        if (tag) url.searchParams.set('tag', tag);
+        else url.searchParams.delete('tag');
         history.replaceState(null, '', url.toString());
-        apply(null);
-      });
-      emptyReset?.addEventListener('click', () => {
-        url.searchParams.delete('tag');
-        history.replaceState(null, '', url.toString());
-        apply(null);
+        apply(tag);
+        // 筛选后滚到列表顶部
+        document.getElementById('archiveGroups')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      reset?.addEventListener('click', () => setTag(null));
+      emptyReset?.addEventListener('click', () => setTag(null));
+
+      tagCloud?.addEventListener('click', (e) => {
+        const btn = e.target?.closest?.('[data-filter]');
+        if (!btn) return;
+        const f = btn.getAttribute('data-filter');
+        setTag(f === '__all' ? null : f);
       });
 
-      apply(target);
+      // 初次加载：按 URL 参数筛选
+      const initial = new URL(location.href).searchParams.get('tag');
+      apply(initial);
     })();
   </script>
 </BaseLayout>
