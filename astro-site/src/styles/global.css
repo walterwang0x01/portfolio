@@ -845,8 +845,12 @@ footer .visit-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
 }
+.related-list {
+  display: none;
+}
 @media (max-width: 768px) {
-  .related-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+  .related-grid { display: none; }
+  .related-list { display: block; }
 }
 .related-card {
   padding: 0;
@@ -890,38 +894,6 @@ footer .visit-stats {
 }
 .related-card .meta { font-size: var(--fs-xs); margin-bottom: 0; }
 .related-card .card-tags { margin-top: auto; padding-top: var(--space-2); }
-
-/* 手机端/平板竖屏：横向紧凑卡片，信息密度更高 */
-@media (max-width: 768px) {
-  .related-card {
-    display: grid;
-    grid-template-columns: 96px 1fr;
-    gap: 0;
-    align-items: stretch;
-  }
-  .related-card .cover {
-    aspect-ratio: auto;
-    width: 96px;
-    height: 100%;
-    min-height: 96px;
-  }
-  .related-card .cover-emoji { font-size: 1.75rem; }
-  .related-card .post-card-body {
-    padding: var(--space-3);
-    min-width: 0;
-  }
-  .related-heading {
-    font-size: var(--fs-sm);
-    -webkit-line-clamp: 2;
-  }
-  .related-card .card-tags {
-    padding-top: var(--space-1);
-  }
-  .related-card .card-tags .badge {
-    font-size: 11px;
-    padding: 2px 7px;
-  }
-}
 
 /* ============================================================
    Author card (collapsible <details>)

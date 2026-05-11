@@ -19,12 +19,14 @@ const cards = posts.map((p) => {
     emoji: pickEmoji(p.data.tags, p.data.emoji),
     gradient: pickGradient(tag0 || p.slug),
     minutes: readingMinutes(p.body),
+    excerpt: p.data.excerpt,
   };
 });
 ---
 {cards.length > 0 && (
   <section class="related" aria-label="相关阅读">
     <h2 class="related-title">📌 相关阅读</h2>
+    {/* 桌面端：3 列网格卡片 */}
     <div class="related-grid">
       {cards.map((c) => (
         <a class="post-card related-card" href={`${BASE}posts/${c.slug}/`}>
@@ -40,6 +42,34 @@ const cards = posts.map((p) => {
             </div>
             <div class="row card-tags">
               {c.tags.map((t) => <span class="badge" data-color={pickTagColorIndex(t)} data-tag={t} role="link" tabindex="0" title={`查看 “${t}” 相关文章`}>{t}</span>)}
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+    {/* 手机端：复用首页 post-row 紧凑行样式 */}
+    <div class="related-list post-list">
+      {cards.map((c) => (
+        <a
+          class="post-row"
+          href={`${BASE}posts/${c.slug}/`}
+          data-tags={c.tags.join(',')}
+        >
+          <div class="post-row-thumb" style={c.cover ? `background-image: url('${c.cover}')` : `background-image: ${c.gradient}`}>
+            {!c.cover && <span class="post-row-emoji" aria-hidden="true">{c.emoji}</span>}
+          </div>
+          <div class="post-row-body">
+            <h3 class="post-row-title">{c.title}</h3>
+            <div class="post-row-meta">
+              <time datetime={c.dateStr}>{c.dateStr}</time>
+              <span class="dot" aria-hidden="true">·</span>
+              <span>🕒 {c.minutes} 分钟</span>
+              {c.tags.slice(0, 1).map((t) => (
+                <>
+                  <span class="dot" aria-hidden="true">·</span>
+                  <span class="badge" data-color={pickTagColorIndex(t)} data-tag={t} role="link" tabindex="0">{t}</span>
+                </>
+              ))}
             </div>
           </div>
         </a>
