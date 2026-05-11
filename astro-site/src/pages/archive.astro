@@ -24,6 +24,15 @@ for (const p of posts) {
 }
 const tagList = [...tagCount.entries()]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+// 默认只展开 "热门"——频次 >= 2 的，至少 8 个，至多 12 个
+const POPULAR_MIN = 2;
+const MIN_SHOW = 8;
+const MAX_SHOW = 12;
+let popularCount = tagList.filter(([, c]) => c >= POPULAR_MIN).length;
+popularCount = Math.max(MIN_SHOW, Math.min(MAX_SHOW, popularCount || MIN_SHOW));
+const popular = tagList.slice(0, popularCount);
+const rest = tagList.slice(popularCount);
 ---
 <BaseLayout title="归档 — Walter's Tech Blog" activeNav="blog">
   <section class="container-narrow">
@@ -34,7 +43,7 @@ const tagList = [...tagCount.entries()]
 
     <div class="tag-cloud" id="tagCloud" aria-label="标签筛选">
       <button type="button" class="badge tag-chip active" data-filter="__all">全部 · {posts.length}</button>
-      {tagList.map(([name, count]) => (
+      {popular.map(([name, count]) => (
         <button
           type="button"
           class="badge tag-chip"
@@ -43,6 +52,24 @@ const tagList = [...tagCount.entries()]
           title={`按 “${name}” 筛选`}
         >{name} · {count}</button>
       ))}
+      {rest.length > 0 && (
+        <>
+          <span class="tag-more-group" id="tagMoreGroup" hidden>
+            {rest.map(([name, count]) => (
+              <button
+                type="button"
+                class="badge tag-chip"
+                data-color={pickTagColorIndex(name)}
+                data-filter={name}
+                title={`按 “${name}” 筛选`}
+              >{name} · {count}</button>
+            ))}
+          </span>
+          <button type="button" class="tag-toggle-more" id="tagToggleMore" aria-expanded="false">
+            更多 +{rest.length}
+          </button>
+        </>
+      )}
     </div>
 
     <div id="tagFilterStatus" class="filter-status" hidden>
@@ -150,8 +177,28 @@ const tagList = [...tagCount.entries()]
         setTag(f === '__all' ? null : f);
       });
 
+      // "更多 +N" 展开/收起
+      const toggleMore = document.getElementById('tagToggleMore');
+      const moreGroup = document.getElementById('tagMoreGroup');
+      function setMore(open) {
+        if (!moreGroup || !toggleMore) return;
+        moreGroup.hidden = !open;
+        toggleMore.setAttribute('aria-expanded', String(open));
+        toggleMore.textContent = open
+          ? '收起 ✕'
+          : `更多 +${moreGroup.querySelectorAll('[data-filter]').length}`;
+      }
+      toggleMore?.addEventListener('click', () => {
+        setMore(toggleMore.getAttribute('aria-expanded') !== 'true');
+      });
+
       // 初次加载：按 URL 参数筛选
       const initial = new URL(location.href).searchParams.get('tag');
+      // 如果初始 tag 在 "更多" 里，自动展开
+      if (initial && moreGroup) {
+        const inMore = moreGroup.querySelector(`[data-filter="${CSS.escape(initial)}"]`);
+        if (inMore) setMore(true);
+      }
       apply(initial);
     })();
   </script>
