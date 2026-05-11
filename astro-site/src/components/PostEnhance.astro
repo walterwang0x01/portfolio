@@ -1,31 +1,119 @@
 <div id="readingProgress"></div>
-<style>
+<style is:global>
   #readingProgress {
     position: fixed; top: 0; left: 0; height: 3px; width: 0;
-    background: var(--primary); z-index: 101;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    z-index: 101;
     transition: width 0.1s ease;
+    box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
   }
+  /* 目录 */
   .post-toc {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     padding: 14px 18px;
     margin: 0 0 28px;
-    font-size: 14px;
+    font-size: var(--fs-sm);
   }
-  .post-toc .toc-title { font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
-  .post-toc a { display: block; color: var(--text-secondary); padding: 3px 0; }
-  .post-toc a:hover { color: var(--primary); }
+  .post-toc .toc-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .post-toc a {
+    display: block;
+    color: var(--text-secondary);
+    padding: 3px 0;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -10px;
+    transition: color var(--transition), border-color var(--transition);
+  }
+  .post-toc a:hover {
+    color: var(--primary);
+    border-left-color: var(--primary);
+  }
+
+  /* 代码块容器：标签化头部 + 复制按钮 */
+  .post-body pre {
+    position: relative;
+    padding-top: 38px !important;
+  }
+  .code-lang-tag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    padding: 8px 14px 6px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    user-select: none;
+    pointer-events: none;
+  }
   .code-copy-btn {
-    position: absolute; top: 8px; right: 8px;
-    background: var(--card-bg); border: 1px solid var(--border-color);
-    color: var(--text-secondary); font-size: 12px;
-    padding: 3px 10px; border-radius: 6px; cursor: pointer;
-    opacity: 0; transition: opacity 0.15s ease;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 28px;
+    padding: 0 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    line-height: 1;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.15s ease, transform 0.15s ease,
+                color var(--transition), border-color var(--transition), background var(--transition);
+    -webkit-tap-highlight-color: transparent;
   }
-  .post-body pre { position: relative; }
-  .post-body pre:hover .code-copy-btn { opacity: 1; }
-  .code-copy-btn.copied { color: var(--primary); border-color: var(--primary); }
+  .code-copy-btn svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+  .code-copy-btn:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: var(--bg-elevated);
+  }
+  .post-body pre:hover .code-copy-btn,
+  .post-body pre:focus-within .code-copy-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .code-copy-btn.copied {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  /* 手机端：永远显示按钮（没有 hover），只是体积更紧凑 */
+  @media (hover: none), (max-width: 640px) {
+    .code-copy-btn {
+      opacity: 1;
+      transform: none;
+      height: 26px;
+      padding: 0 8px;
+      font-size: 11px;
+    }
+    .code-copy-btn .code-copy-text { display: none; }
+    .code-copy-btn.copied .code-copy-text {
+      display: inline;
+      font-size: 10px;
+    }
+    .post-body pre { padding-top: 36px !important; }
+  }
 </style>
 <script>
   const bar = document.getElementById('readingProgress');
@@ -36,8 +124,13 @@
       bar.style.width = max > 0 ? Math.min(100, (window.scrollY / max) * 100) + '%' : '0';
     });
   }
+
+  const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
   const body = document.querySelector('.post-body');
   if (body) {
+    // 目录
     const hs = body.querySelectorAll('h2');
     if (hs.length >= 2) {
       const nav = document.createElement('nav');
@@ -57,21 +150,56 @@
         });
       });
     }
+
+    // 代码块增强：语言标签 + 复制按钮
     body.querySelectorAll('pre').forEach((pre) => {
       if (pre.querySelector('.code-copy-btn')) return;
+
+      const code = pre.querySelector('code');
+      // 从 code 的 class 里解析语言（shiki 不加 language-*，shiki 有 data-language；astro markdown 有 class="language-xxx"）
+      let lang = '';
+      if (code) {
+        const langClass = Array.from(code.classList).find((c) => c.startsWith('language-'));
+        if (langClass) lang = langClass.replace('language-', '');
+        else if (code.dataset.language) lang = code.dataset.language;
+      }
+      if (!lang && pre.dataset.language) lang = pre.dataset.language;
+
+      if (lang && lang !== 'plaintext' && lang !== 'text') {
+        const tag = document.createElement('span');
+        tag.className = 'code-lang-tag';
+        tag.textContent = lang;
+        pre.appendChild(tag);
+      }
+
       const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'code-copy-btn';
-      btn.textContent = '复制';
       btn.setAttribute('aria-label', '复制代码');
+      btn.innerHTML = `${COPY_ICON}<span class="code-copy-text">复制</span>`;
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const code = pre.querySelector('code');
         const text = code ? code.textContent ?? '' : pre.textContent ?? '';
-        navigator.clipboard.writeText(text).then(() => {
-          btn.textContent = '已复制 ✓';
+        const restore = () => {
+          btn.innerHTML = `${COPY_ICON}<span class="code-copy-text">复制</span>`;
+          btn.classList.remove('copied');
+        };
+        const onOk = () => {
+          btn.innerHTML = `${CHECK_ICON}<span class="code-copy-text">已复制</span>`;
           btn.classList.add('copied');
-          setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
-        });
+          setTimeout(restore, 1500);
+        };
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(text).then(onOk).catch(() => {
+            // fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); onOk(); } catch (_) {}
+            document.body.removeChild(ta);
+          });
+        }
       });
       pre.appendChild(btn);
     });

@@ -832,10 +832,7 @@ footer .visit-stats {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
 }
-@media (max-width: 960px) {
-  .related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .related-grid { grid-template-columns: 1fr; gap: var(--space-3); }
 }
 .related-card {
@@ -881,8 +878,8 @@ footer .visit-stats {
 .related-card .meta { font-size: var(--fs-xs); margin-bottom: 0; }
 .related-card .card-tags { margin-top: auto; padding-top: var(--space-2); }
 
-/* 手机端：横向紧凑卡片，信息密度更高 */
-@media (max-width: 640px) {
+/* 手机端/平板竖屏：横向紧凑卡片，信息密度更高 */
+@media (max-width: 768px) {
   .related-card {
     display: grid;
     grid-template-columns: 96px 1fr;
