@@ -155,4 +155,4 @@ AI Agent 不是一个单一的技术，而是一套**将 LLM 从"对话工具"�
 
 但也不要被"自主"这个词迷惑——当前阶段，最好的 Agent 不是最自主的，而是**在合适的地方自主、在关键的地方受控**的。Anthropic 说得好：从简单开始，仅在必要时增加复杂度。
 
-> 想深入学习？我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有 400+ 篇 AI Agent 学习笔记，覆盖基础概念、设计模式、框架实战、协议标准、安全治理等完整知识体系，从入门到生产级开发一站式覆盖。
+> 想深入学习？我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有 400+ 篇 AI Agent 学习笔记，覆盖基础概念、设计模式、框架实战、协议标准、安全治理等完整知识体系，从入门到生产级开发一站式覆盖。

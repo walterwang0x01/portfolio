@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Walter's Tech Blog</title>
-    <link>https://walterhandsome.github.io/</link>
+    <link>https://walterwang0x01.github.io/</link>
     <description>AI Agent、RAG、Context Engineering、MCP 协议等前沿技术深度文章，基于 400+ 篇开源技术笔记的分享</description>
     <language>zh-CN</language>
     <lastBuildDate>Mon, 20 Apr 2026 00:00:00 +0800</lastBuildDate>
-    <atom:link href="https://walterhandsome.github.io/rss.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="https://walterwang0x01.github.io/rss.xml" rel="self" type="application/rss+xml"/>
 
     <item>
       <title>Vibe Coding 时代：用自然语言构建应用的完整指南</title>
-      <link>https://walterhandsome.github.io/#vibe-coding-era</link>
-      <guid>https://walterhandsome.github.io/#vibe-coding-era</guid>
+      <link>https://walterwang0x01.github.io/#vibe-coding-era</link>
+      <guid>https://walterwang0x01.github.io/#vibe-coding-era</guid>
       <pubDate>Mon, 20 Apr 2026 00:00:00 +0800</pubDate>
       <description>Andrej Karpathy 提出的 Vibe Coding 正在让"人人都是开发者"成为现实。从 Replit 到 Bolt.new，一文搞懂 Vibe Coding 工具生态、适用场景与局限性。</description>
       <category>Vibe Coding</category>
@@ -20,8 +20,8 @@
 
     <item>
       <title>Function Calling 实战：让 LLM 操作真实世界</title>
-      <link>https://walterhandsome.github.io/#function-calling-in-action</link>
-      <guid>https://walterhandsome.github.io/#function-calling-in-action</guid>
+      <link>https://walterwang0x01.github.io/#function-calling-in-action</link>
+      <guid>https://walterwang0x01.github.io/#function-calling-in-action</guid>
       <pubDate>Mon, 20 Apr 2026 00:00:00 +0800</pubDate>
       <description>Function Calling 是 AI Agent 从"能说"到"能做"的关键技术。从 OpenAI 到 Claude 的实现差异，到并行调用、流式处理的生产级实践。</description>
       <category>Function Calling</category>
@@ -30,8 +30,8 @@
 
     <item>
       <title>Agent 安全实战：Prompt 注入、记忆投毒与纵深防御</title>
-      <link>https://walterhandsome.github.io/#agent-security-prompt-injection</link>
-      <guid>https://walterhandsome.github.io/#agent-security-prompt-injection</guid>
+      <link>https://walterwang0x01.github.io/#agent-security-prompt-injection</link>
+      <guid>https://walterwang0x01.github.io/#agent-security-prompt-injection</guid>
       <pubDate>Mon, 20 Apr 2026 00:00:00 +0800</pubDate>
       <description>当 AI Agent 拥有了操作真实世界的能力，安全问题就不再只是输出一段有害文本那么简单。从真实 CVE 案例到记忆投毒攻击，系统梳理 Agent 安全的威胁全景与防御体系。</description>
       <category>Agent 安全</category>
@@ -40,8 +40,8 @@
 
     <item>
       <title>MCP 协议深度解析：AI Agent 的「USB 接口」</title>
-      <link>https://walterhandsome.github.io/#mcp-protocol-deep-dive</link>
-      <guid>https://walterhandsome.github.io/#mcp-protocol-deep-dive</guid>
+      <link>https://walterwang0x01.github.io/#mcp-protocol-deep-dive</link>
+      <guid>https://walterwang0x01.github.io/#mcp-protocol-deep-dive</guid>
       <pubDate>Sat, 18 Apr 2026 00:00:00 +0800</pubDate>
       <description>MCP（Model Context Protocol）正在成为 AI Agent 连接外部工具的事实标准。这篇文章从协议设计、核心架构到实战开发，带你彻底搞懂 MCP。</description>
       <category>MCP</category>
@@ -50,8 +50,8 @@
 
     <item>
       <title>AI Agent 框架选型：LangGraph vs CrewAI vs OpenAI SDK 实战对比</title>
-      <link>https://walterhandsome.github.io/#ai-agent-framework-comparison</link>
-      <guid>https://walterhandsome.github.io/#ai-agent-framework-comparison</guid>
+      <link>https://walterwang0x01.github.io/#ai-agent-framework-comparison</link>
+      <guid>https://walterwang0x01.github.io/#ai-agent-framework-comparison</guid>
       <pubDate>Sat, 18 Apr 2026 00:00:00 +0800</pubDate>
       <description>面对十几个 AI Agent 框架，到底该选哪个？基于实际项目经验，从架构设计、开发体验、生产就绪度三个维度做横向对比。</description>
       <category>Agent 框架</category>
@@ -60,8 +60,8 @@
 
     <item>
       <title>RAG 从入门到进阶：让 LLM 拥有你的私有知识库</title>
-      <link>https://walterhandsome.github.io/#rag-from-beginner-to-advanced</link>
-      <guid>https://walterhandsome.github.io/#rag-from-beginner-to-advanced</guid>
+      <link>https://walterwang0x01.github.io/#rag-from-beginner-to-advanced</link>
+      <guid>https://walterwang0x01.github.io/#rag-from-beginner-to-advanced</guid>
       <pubDate>Sat, 18 Apr 2026 00:00:00 +0800</pubDate>
       <description>RAG 是让 LLM 突破训练数据限制的关键技术。从基础架构到高级优化策略，一篇文章带你掌握 RAG 的核心要点。</description>
       <category>RAG</category>
@@ -70,8 +70,8 @@
 
     <item>
       <title>Context Engineering：比 Prompt Engineering 更重要的事</title>
-      <link>https://walterhandsome.github.io/#context-engineering</link>
-      <guid>https://walterhandsome.github.io/#context-engineering</guid>
+      <link>https://walterwang0x01.github.io/#context-engineering</link>
+      <guid>https://walterwang0x01.github.io/#context-engineering</guid>
       <pubDate>Sat, 18 Apr 2026 00:00:00 +0800</pubDate>
       <description>当 AI Agent 从 Demo 走向生产，真正决定成败的不是你怎么写 Prompt，而是你怎么设计整个上下文系统。深入解析 Context Engineering 的核心理念与实战方法。</description>
       <category>Context Engineering</category>

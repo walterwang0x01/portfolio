@@ -166,4 +166,4 @@ Anthropic 官方在推出 Computer Use 时就明确警告"目前仍不适合在�
 
 > Computer Use 不是来取代 Function Calling 的，而是把 Agent 的能力边界从"API 覆盖的世界"扩展到"人类能操作的整个数字世界"。真正的生产级方案往往是三者混合：**能走 API 就走 API，浏览器场景走 DOM，其它兜底用视觉**。
 
-相关笔记可以在我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 找到完整的浏览器与 Agent 生态笔记（6 篇），包括 Computer Use、Agent Skills、AgentOS 的架构对比与代码示例。
+相关笔记可以在我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 找到完整的浏览器与 Agent 生态笔记（6 篇），包括 Computer Use、Agent Skills、AgentOS 的架构对比与代码示例。

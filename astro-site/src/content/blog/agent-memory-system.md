@@ -330,4 +330,4 @@ past = exp_store.recall_similar("分析用户行为数据")
 
 建议的落地路径：**先用 Mem0 或 LangMem 快速加上基础记忆 → 验证业务价值 → 根据需求升级到 Zep（时序图谱）或 Letta（自主管理）**。不要一上来就搭最复杂的架构，记忆系统的价值需要在真实用户交互中才能体现。
 
-> 我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有完整的 Agent 记忆系统学习笔记（6 篇），覆盖短期/长期记忆、对话管理、Mem0/Letta/Zep/LangMem 四大框架详解，以及知识库与经验学习的工程实践。
+> 我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有完整的 Agent 记忆系统学习笔记（6 篇），覆盖短期/长期记忆、对话管理、Mem0/Letta/Zep/LangMem 四大框架详解，以及知识库与经验学习的工程实践。

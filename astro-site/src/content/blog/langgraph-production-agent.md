@@ -235,7 +235,7 @@ app = main_graph.compile()
 
 ## 实战架构：LangGraph + MCP + RAG
 
-在我的 [LangGraph + MCP Agent Demo](https://github.com/WalterHandsome/tech-learning-and-projects/tree/main/langgraph-mcp-agent-demo) 项目中，完整展示了一个生产级 Agent 的架构：
+在我的 [LangGraph + MCP Agent Demo](https://github.com/walterwang0x01/tech-learning-and-projects/tree/main/langgraph-mcp-agent-demo) 项目中，完整展示了一个生产级 Agent 的架构：
 
 ```
 用户请求
@@ -375,6 +375,6 @@ LangGraph 不是万能的。了解它的适用边界和了解它的能力一样�
 
 LangGraph 的核心价值不在于它让 Agent 更"智能"，而在于它让 Agent 更"可控"。在生产环境中，可控性比智能性更重要——你需要知道 Agent 在每一步做了什么、为什么这么做、出了问题怎么回滚。图结构 + 状态持久化 + 人机协作，这三个特性组合在一起，让 LangGraph 成为了从 Demo 走向生产的关键桥梁。
 
-如果你准备动手，建议从官方的 [LangGraph Tutorials](https://langchain-ai.github.io/langgraph/tutorials/) 开始，然后参考我的 [LangGraph + MCP Agent Demo](https://github.com/WalterHandsome/tech-learning-and-projects/tree/main/langgraph-mcp-agent-demo) 看一个完整的生产级实现。
+如果你准备动手，建议从官方的 [LangGraph Tutorials](https://langchain-ai.github.io/langgraph/tutorials/) 开始，然后参考我的 [LangGraph + MCP Agent Demo](https://github.com/walterwang0x01/tech-learning-and-projects/tree/main/langgraph-mcp-agent-demo) 看一个完整的生产级实现。
 
-> 我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有 8 篇 Agent 框架深度笔记和 2 个可运行的实战项目，覆盖 LangGraph、CrewAI、OpenAI SDK、Google ADK、AWS Strands 等主流框架的完整对比。
+> 我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有 8 篇 Agent 框架深度笔记和 2 个可运行的实战项目，覆盖 LangGraph、CrewAI、OpenAI SDK、Google ADK、AWS Strands 等主流框架的完整对比。

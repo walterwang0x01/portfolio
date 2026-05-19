@@ -185,4 +185,4 @@ LiveKit v1.5 的自适应中断处理是目前开源方案中最先进的——�
 
 但技术成熟不等于产品成功。语音交互的设计空间远比文字复杂——你需要考虑打断策略、沉默处理、情感语调、多语言切换、电话网络适配等一系列文字 Agent 不需要面对的问题。**最好的语音 Agent 不是技术最先进的，而是对话体验最自然的。**
 
-> 本文内容基于 [tech-learning-and-projects](https://github.com/WalterHandsome/tech-learning-and-projects) 仓库中的语音 Agent 学习笔记，包含更详细的代码示例和平台对比。
+> 本文内容基于 [tech-learning-and-projects](https://github.com/walterwang0x01/tech-learning-and-projects) 仓库中的语音 Agent 学习笔记，包含更详细的代码示例和平台对比。

@@ -125,4 +125,4 @@ def multi_query_retrieve(question: str) -> list:
 
 推荐使用 RAGAS 框架做自动化评估，它提供了上述指标的标准化计算方法。
 
-> RAG 看似简单，但要做好需要在分块、检索、重排序、生成每个环节都精心调优。我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有 4 篇 RAG 进阶笔记，从基础架构到 GraphRAG 都有覆盖。
+> RAG 看似简单，但要做好需要在分块、检索、重排序、生成每个环节都精心调优。我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有 4 篇 RAG 进阶笔记，从基础架构到 GraphRAG 都有覆盖。

@@ -59,7 +59,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
         <ul class="navbar-links">
           <li><a href={BASE} class={activeNav === 'blog' ? 'active' : ''}>博客</a></li>
           <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
-          <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
+          <li><a href="https://github.com/walterwang0x01/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
         </ul>
         <div class="navbar-actions">
           <button class="cmdk-trigger" id="cmdkTrigger" aria-label="搜索" title="搜索 (⌘K)">
@@ -73,7 +73,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
       <ul class="mobile-nav" id="mobileNav">
         <li><a href={BASE} class={activeNav === 'blog' ? 'active' : ''}>博客</a></li>
         <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
-        <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
+        <li><a href="https://github.com/walterwang0x01/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
       </ul>
     </nav>
     <main id="main"><slot /></main>

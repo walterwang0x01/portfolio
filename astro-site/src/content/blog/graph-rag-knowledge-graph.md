@@ -276,4 +276,4 @@ GraphRAG 代表了 RAG 技术的一个重要演进方向：从"基于语义相�
 
 如果你的知识库中实体关系复杂、用户经常问需要跨文档推理的问题，GraphRAG 值得认真评估。从微软的开源框架开始，搭一个 POC 验证效果，再决定是否投入生产。
 
-> 我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有 4 篇 RAG 进阶笔记，从基础架构、向量数据库选型、高级 RAG 策略到 GraphRAG 知识图谱，完整覆盖 RAG 技术栈的各个层面。
+> 我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有 4 篇 RAG 进阶笔记，从基础架构、向量数据库选型、高级 RAG 策略到 GraphRAG 知识图谱，完整覆盖 RAG 技术栈的各个层面。

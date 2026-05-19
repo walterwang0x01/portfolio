@@ -8,7 +8,7 @@ draft: false
 ---
 你的 AI Agent 能帮你搜索信息、生成代码、分析数据，但有一件事它做不了——**花钱**。当 Agent 需要调用一个付费 API、购买一份数据、或者使用一个 SaaS 服务时，它只能停下来等你手动操作。这就是 Agent 经济的核心瓶颈：**Agent 没有自己的支付能力**。
 
-x402 协议正在改变这一点。它由 Coinbase 发起，将支付嵌入 HTTP 协议本身——Agent 发请求遇到 402 状态码，自动签名付款，拿到数据继续干活。整个过程不需要信用卡、不需要注册账号、不需要人工审批。本文基于 [tech-learning-and-projects](https://github.com/WalterHandsome/tech-learning-and-projects) 仓库中的 Agent 支付学习笔记和 x402 实战 Demo，从协议原理到生产部署完整拆解。
+x402 协议正在改变这一点。它由 Coinbase 发起，将支付嵌入 HTTP 协议本身——Agent 发请求遇到 402 状态码，自动签名付款，拿到数据继续干活。整个过程不需要信用卡、不需要注册账号、不需要人工审批。本文基于 [tech-learning-and-projects](https://github.com/walterwang0x01/tech-learning-and-projects) 仓库中的 Agent 支付学习笔记和 x402 实战 Demo，从协议原理到生产部署完整拆解。
 
 ## 为什么 Agent 需要自己的支付体系？
 

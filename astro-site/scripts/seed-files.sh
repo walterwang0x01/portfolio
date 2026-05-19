@@ -129,7 +129,7 @@ const BASE = import.meta.env.BASE_URL;
         <ul class="navbar-links">
           <li><a href={BASE} class={activeNav === 'blog' ? 'active' : ''}>博客</a></li>
           <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
-          <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
+          <li><a href="https://github.com/walterwang0x01/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
         </ul>
         <div style="display:flex;gap:8px;align-items:center">
           <button class="menu-toggle" id="menuToggle" aria-label="打开导航菜单" aria-expanded="false">☰</button>
@@ -139,7 +139,7 @@ const BASE = import.meta.env.BASE_URL;
       <ul class="mobile-nav" id="mobileNav">
         <li><a href={BASE}>博客</a></li>
         <li><a href={`${BASE}briefing/`}>简报</a></li>
-        <li><a href="https://github.com/WalterHandsome/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
+        <li><a href="https://github.com/walterwang0x01/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
       </ul>
     </nav>
     <main id="main"><slot /></main>
@@ -204,7 +204,7 @@ const BASE = import.meta.env.BASE_URL;
       container.innerHTML = '<h3 style="margin-bottom: 12px; color: var(--text-primary)">💬 评论</h3>';
       const s = document.createElement('script');
       s.src = 'https://giscus.app/client.js';
-      s.setAttribute('data-repo', 'WalterHandsome/portfolio');
+      s.setAttribute('data-repo', 'walterwang0x01/portfolio');
       s.setAttribute('data-repo-id', 'R_kgDOSFA_HQ');
       s.setAttribute('data-category', 'Announcements');
       s.setAttribute('data-category-id', 'DIC_kwDOSFA_Hc4C7Q-z');
@@ -339,7 +339,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
   <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
   <script is:inline>
     (function () {
-      const REPO = 'WalterHandsome/tech-learning-and-projects';
+      const REPO = 'walterwang0x01/tech-learning-and-projects';
       const BRANCH = 'main';
       const BASE_API = `https://api.github.com/repos/${REPO}/contents/learning-notes/briefings`;
       const RAW = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/learning-notes/briefings`;
@@ -459,7 +459,7 @@ cat > public/robots.txt <<'TXT'
 User-agent: *
 Allow: /
 
-Sitemap: https://walterhandsome.github.io/portfolio/sitemap-index.xml
+Sitemap: https://walterwang0x01.github.io/portfolio/sitemap-index.xml
 TXT
 
 # ============ README ============

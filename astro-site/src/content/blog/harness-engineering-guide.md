@@ -11,7 +11,7 @@ draft: false
 
 OpenAI 在 2026 年提出的 [Harness Engineering](https://openai.com/index/harness-engineering) 就是回答这个问题的方法论。如果说 Prompt Engineering 是调一句话、Context Engineering 是组织一次上下文，Harness Engineering 关心的是**整个工程骨架**——Agent 在什么规范下工作、遇到什么事件触发什么动作、用什么标准自我评估、如何形成闭环。
 
-本文基于 [tech-learning-and-projects](https://github.com/WalterHandsome/tech-learning-and-projects) 仓库中 `16-Harness Engineering` 目录的系统化笔记，拆解五大实践、自主循环模式和 CI/CD 落地方案。
+本文基于 [tech-learning-and-projects](https://github.com/walterwang0x01/tech-learning-and-projects) 仓库中 `16-Harness Engineering` 目录的系统化笔记，拆解五大实践、自主循环模式和 CI/CD 落地方案。
 
 ## 什么是 Harness
 

@@ -458,4 +458,4 @@ MCP 的价值不在于它有多复杂——恰恰相反，它的设计哲学是*
 
 如果你正在构建 AI Agent 应用，MCP 应该是你的第一选择——不是因为它完美，而是因为它是当前生态最大、支持最广、演进最快的 Agent 工具连接标准。先用社区现成的 Server 快速验证想法，再根据业务需求开发自定义 Server，这是最务实的路径。
 
-> 本文内容基于 [tech-learning-and-projects](https://github.com/WalterHandsome/tech-learning-and-projects) 仓库中的 MCP 协议学习笔记，结合 Anthropic 官方文档和社区最佳实践总结。仓库中还有 MCP Server 开发模板和配置示例，欢迎参考。
+> 本文内容基于 [tech-learning-and-projects](https://github.com/walterwang0x01/tech-learning-and-projects) 仓库中的 MCP 协议学习笔记，结合 Anthropic 官方文档和社区最佳实践总结。仓库中还有 MCP Server 开发模板和配置示例，欢迎参考。

@@ -2,7 +2,7 @@
 
 我的技术博客，纯 HTML/CSS/JS 实现，零依赖，部署在 GitHub Pages。
 
-🔗 **在线预览**：https://walterhandsome.github.io/portfolio/
+🔗 **在线预览**：https://walterwang0x01.github.io/portfolio/
 
 ## 项目结构
 

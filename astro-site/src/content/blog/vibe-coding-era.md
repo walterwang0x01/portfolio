@@ -95,4 +95,4 @@ Vibe Coding 不是银弹。了解它的局限性和了解它的能力一样重�
 2.  **验证成功后**：用 IDE Agent（Kiro/Cursor）重构为生产级代码，加入测试、安全防护、CI/CD
 3.  **或者直接**：用 Kiro 的 Specs 功能从需求开始规范化开发，跳过原型阶段
 
-> Vibe Coding 降低了"从 0 到 1"的门槛，IDE Agent 保证了"从 1 到 100"的质量。两者结合，才是 AI 时代开发者的最优工作流。更多 Coding Agent 相关笔记，参考我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中 Coding Agent 章节的 6 篇深度笔记。
+> Vibe Coding 降低了"从 0 到 1"的门槛，IDE Agent 保证了"从 1 到 100"的质量。两者结合，才是 AI 时代开发者的最优工作流。更多 Coding Agent 相关笔记，参考我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中 Coding Agent 章节的 6 篇深度笔记。

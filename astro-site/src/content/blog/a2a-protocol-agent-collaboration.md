@@ -338,4 +338,4 @@ A2A 协议的意义不只是技术标准——它代表了 AI Agent 生态从"�
 
 2026 年是 A2A 的元年：v1.0 稳定规范发布、Linux Foundation 托管、150+ 组织支持、5 种语言 SDK。如果你正在构建多 Agent 系统，现在是认真了解 A2A 的最佳时机。
 
-> 我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有完整的 Agent 协议学习笔记（6 篇），覆盖 MCP、A2A、ACP、ANP、AG-UI 协议全景，以及协议选型指南和实战集成方案。
+> 我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有完整的 Agent 协议学习笔记（6 篇），覆盖 MCP、A2A、ACP、ANP、AG-UI 协议全景，以及协议选型指南和实战集成方案。

@@ -171,4 +171,4 @@ Function Calling 是模型层面的能力，MCP 是协议层面的标准。两�
 
 简单说：Function Calling 是"LLM 怎么调工具"，MCP 是"工具怎么被发现和连接"。
 
-> Function Calling 是 AI Agent 的基石能力。掌握了它，你就理解了 Agent 如何与真实世界交互。我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有 4 篇工具与 Function Calling 的深度笔记，覆盖机制原理、MCP Server 开发、工具编排与安全。
+> Function Calling 是 AI Agent 的基石能力。掌握了它，你就理解了 Agent 如何与真实世界交互。我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有 4 篇工具与 Function Calling 的深度笔记，覆盖机制原理、MCP Server 开发、工具编排与安全。

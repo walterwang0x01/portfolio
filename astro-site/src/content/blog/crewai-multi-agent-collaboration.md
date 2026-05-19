@@ -107,7 +107,7 @@ crew = Crew(
 
 ## 实战：四人内容创作团队
 
-在我的 [CrewAI 多 Agent Demo](https://github.com/WalterHandsome/tech-learning-and-projects/tree/main/crewai-multi-agent-demo) 项目中，搭建了一个完整的内容创作流水线：
+在我的 [CrewAI 多 Agent Demo](https://github.com/walterwang0x01/tech-learning-and-projects/tree/main/crewai-multi-agent-demo) 项目中，搭建了一个完整的内容创作流水线：
 
 ```
 用户输入主题
@@ -313,4 +313,4 @@ CrewAI 的核心价值在于**降低了多 Agent 协作的门槛**。你不需�
 
 对于内容生成、研究分析、数据处理这类"多角色流水线"场景，CrewAI 是目前最高效的选择。如果你的需求更复杂（条件分支、人工审批、状态持久化），可以考虑 LangGraph，或者两者组合使用。
 
-> 我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有一个完整的 [CrewAI 多 Agent Demo](https://github.com/WalterHandsome/tech-learning-and-projects/tree/main/crewai-multi-agent-demo) 项目，展示了四人内容创作团队的完整实现，以及 3 篇多 Agent 系统的深度笔记，覆盖架构模式、通信协调和人机协作。
+> 我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有一个完整的 [CrewAI 多 Agent Demo](https://github.com/walterwang0x01/tech-learning-and-projects/tree/main/crewai-multi-agent-demo) 项目，展示了四人内容创作团队的完整实现，以及 3 篇多 Agent 系统的深度笔记，覆盖架构模式、通信协调和人机协作。

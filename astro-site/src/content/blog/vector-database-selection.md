@@ -253,4 +253,4 @@ Qdrant、Pinecone、Weaviate、Milvus 都原生支持混合搜索。pgvector 需
 
 如果你刚开始学 RAG，用 Chroma 快速上手，理解核心流程。当你准备上生产时，根据团队的基础设施和数据规模，在 pgvector、Qdrant、Pinecone 中选一个。亿级数据才需要考虑 Milvus。
 
-> 我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有完整的向量数据库选型笔记和 RAG 进阶系列（4 篇），覆盖 RAG 架构、向量数据库对比、高级检索策略和 GraphRAG，以及可运行的 [RAG + LLM Agent 平台](https://github.com/WalterHandsome/tech-learning-and-projects/tree/main/rag-llm-agent-platform) 实战项目。
+> 我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有完整的向量数据库选型笔记和 RAG 进阶系列（4 篇），覆盖 RAG 架构、向量数据库对比、高级检索策略和 GraphRAG，以及可运行的 [RAG + LLM Agent 平台](https://github.com/walterwang0x01/tech-learning-and-projects/tree/main/rag-llm-agent-platform) 实战项目。

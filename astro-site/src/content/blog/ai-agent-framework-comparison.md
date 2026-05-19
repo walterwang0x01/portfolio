@@ -118,4 +118,4 @@ writer = Agent(name="writer",
 
 没有最好的框架，只有最适合你场景的框架。建议先明确你的核心需求，再做选择。
 
-> 我在 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有 8 篇框架深度对比笔记和 2 个可运行的实战项目，覆盖了 LangGraph、CrewAI、OpenAI SDK、Google ADK、AWS Strands 等主流框架。
+> 我在 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有 8 篇框架深度对比笔记和 2 个可运行的实战项目，覆盖了 LangGraph、CrewAI、OpenAI SDK、Google ADK、AWS Strands 等主流框架。

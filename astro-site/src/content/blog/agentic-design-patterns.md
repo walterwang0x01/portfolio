@@ -10,7 +10,7 @@ draft: false
 
 Anthropic 在 "Building Effective Agents" 指南中提出了一个关键区分：**Workflow（工作流）和 Agent（自主体）是两种不同的 Agentic 系统**。Workflow 按预定义路径编排 LLM 调用，可预测、可控；Agent 让模型自主决策执行路径，灵活但不确定性更高。大多数生产系统需要的是 Workflow，而不是完全自主的 Agent。
 
-本文基于 [tech-learning-and-projects](https://github.com/WalterHandsome/tech-learning-and-projects) 仓库中的 Agentic 设计模式学习笔记，用代码拆解每种模式的实现方式和适用场景。
+本文基于 [tech-learning-and-projects](https://github.com/walterwang0x01/tech-learning-and-projects) 仓库中的 Agentic 设计模式学习笔记，用代码拆解每种模式的实现方式和适用场景。
 
 ## 先搞清楚：Workflow vs Agent
 
@@ -279,4 +279,4 @@ def autonomous_agent(task: str, max_turns: int = 10) -> str:
 
 记住 Anthropic 的核心原则：从简单开始，仅在必要时增加复杂度。
 
-> 本文内容基于 [tech-learning-and-projects](https://github.com/WalterHandsome/tech-learning-and-projects) 仓库中的 Agentic 设计模式学习笔记，包含更详细的代码示例和框架对比。
+> 本文内容基于 [tech-learning-and-projects](https://github.com/walterwang0x01/tech-learning-and-projects) 仓库中的 Agentic 设计模式学习笔记，包含更详细的代码示例和框架对比。

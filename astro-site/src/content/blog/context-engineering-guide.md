@@ -267,4 +267,4 @@ Context Engineering 不是一个新概念，而是对我们一直在做的事情
 
 记住 Karpathy 的类比：你是操作系统，上下文窗口是 RAM。好的操作系统不会把所有数据都加载到内存里，而是在正确的时间加载正确的数据。Context Engineering 就是这门艺术。
 
-> 本文内容基于 [tech-learning-and-projects](https://github.com/WalterHandsome/tech-learning-and-projects) 仓库中的 Context Engineering 学习笔记，结合 Anthropic、LangChain、Martin Fowler 等权威来源的最新实践总结。
+> 本文内容基于 [tech-learning-and-projects](https://github.com/walterwang0x01/tech-learning-and-projects) 仓库中的 Context Engineering 学习笔记，结合 Anthropic、LangChain、Martin Fowler 等权威来源的最新实践总结。

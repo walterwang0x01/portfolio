@@ -170,4 +170,4 @@ Agent 安全不是一个可以"事后补丁"的问题。当你赋予 AI 操作�
 2.  **纵深防御**，任何单一防线都不可靠，多层叠加才能将攻击成本提升到不可接受的水平
 3.  **持续验证**，安全不是一次性的，需要在 CI/CD 中持续运行红队测试
 
-> 我的 [GitHub 仓库](https://github.com/WalterHandsome/tech-learning-and-projects) 中有 6 篇 Agent 安全与治理的深度笔记，覆盖身份权限、纵深防御、Prompt 注入、MCP 安全漏洞、供应链攻击等完整知识体系。
+> 我的 [GitHub 仓库](https://github.com/walterwang0x01/tech-learning-and-projects) 中有 6 篇 Agent 安全与治理的深度笔记，覆盖身份权限、纵深防御、Prompt 注入、MCP 安全漏洞、供应链攻击等完整知识体系。
