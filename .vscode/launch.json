@@ -1,15 +1,16 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "启动博客开发服务器 (Astro dev)",
-            "type": "node",
-            "request": "launch",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": ["run", "dev"],
-            "cwd": "${workspaceFolder}/astro-site",
-            "console": "integratedTerminal",
-            "skipFiles": ["<node_internals>/**"]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🌐 Astro dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/astro-site",
+      "console": "integratedTerminal",
+      "consoleName": "🌐 Astro dev",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    }
+  ]
 }
