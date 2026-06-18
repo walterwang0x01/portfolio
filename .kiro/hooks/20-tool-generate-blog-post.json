@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "✍️ 生成博客文章",
+      "description": "从 AI Agent 前沿方向选主题，生成一篇中文技术博客 Markdown 到 astro-site/src/content/blog/。",
+      "trigger": "Manual",
+      "action": {
+        "type": "agent",
+        "prompt": "生成一篇高质量中文技术博客 Markdown，遵循 `#[[file:.kiro/steering/blog-conventions.md]]` 的规范。\n\n## 架构与产物\n\n- 文件路径：`astro-site/src/content/blog/<slug>.md`\n- 不要碰 `index.html` 或 `astro-site/src/pages/`，只创建 `.md` 文件\n- push 到 main 后，GitHub Actions 自动构建部署\n\n## Step 1：去重\n\n先跑 `ls astro-site/src/content/blog/` 列出已写主题，**严禁和已有 slug 或主题概念重合**。如果题库里所有方向都写过了，主动挑一个题库外但在 AI Agent / LLM 工程化领域有实操价值的新主题。\n\n## Step 2：选题（按热度从 2026 年工程视角排序）\n\n### 一线前沿（优先）\n- **Skill-based Agent 架构** — Claude Skills / Computer Use / Agent Builder 的 skill 组合模式\n- **Agent 成本工程** — Prompt Cache、小模型降级、Token 预算管理、LLM Router 实战\n- **Long-horizon Agent** — 几小时到几天级任务的状态管理、错误恢复、审批机制\n- **Agent 数据工程** — Agent 训练/微调数据收集、合成、质量评估的工程实践\n- **Agent Benchmark 实战** — SWE-bench / WebArena / OSWorld 的评测方法与复现陷阱\n- **浏览器 Agent 生产化** — Browser Use、Playwright Agent、反爬与风控应对\n\n### 工具与协议层\n- **Tool Use 高级模式** — 并行调用、工具链优化、错误重试、Tool Schema 设计陷阱\n- **MCP Server 生产实战** — 鉴权、限流、远程 MCP、MCP Registry\n- **Agent Sandbox** — E2B / Modal / Firecracker 沙盒选型与安全隔离\n- **RAG 混合检索** — BM25 + 向量 + Reranker + Query Rewrite 的生产方案\n- **结构化输出工程** — JSON Mode、Structured Outputs、Outlines、BAML 对比\n\n### 基础设施层\n- **Prompt Cache 深度** — Anthropic / DeepSeek / OpenAI 三种 cache 机制对比与省钱策略\n- **模型蒸馏与量化** — 自托管 Agent 的模型选型、量化、服务部署\n- **Agent 监控告警** — LangSmith / Langfuse / Arize 的对比与落地\n- **多模态 Agent** — 视觉 + 工具 Agent 的架构（GPT-4o、Claude、Gemini）\n- **Agent UX 设计** — 流式输出、思考过程展示、中断 / 确认 / 纠正的交互模式\n\n### 方法论与认知\n- **Agent 设计反模式** — 10 个真实翻车案例与修复思路\n- **从 POC 到生产** — AI Agent 项目的上线 checklist\n- **AI Agent 与传统工程的边界** — 什么时候不该用 Agent\n\n## Step 3：frontmatter（关键）\n\n- 必需字段：`title / date / tags / excerpt / vip: false / draft: false`\n- **可选但强烈建议**：`emoji: \"🤖\"` 这类单 emoji 字段，让卡片封面有主题辨识度（不填会按 tag 自动匹配）\n- tags 2-3 个，**优先复用已有标签**（先 `grep -h '^tags:' astro-site/src/content/blog/*.md | sort -u`）\n- excerpt 1-2 句，≤400 字符，要有钩子（读完能让人想点开）\n\n## Step 4：正文要求\n\n- 1800-2500 字，技术深度优先，必有可运行代码示例（Python / TypeScript）\n- `##` 作为章节标题（h1 由 title 自动生成，不要写）\n- 代码块必须标注语言\n- 至少 1 个对比表格或决策矩阵\n- 结尾给出「选型建议」或「落地 checklist」，让读者有 takeaway\n\n## Step 5：校验\n\n1. 本地构建验证：`cd astro-site && npm run build`（会跑 content collection schema 检查）\n2. 告诉用户：新文件路径、本地预览命令 `cd astro-site && npm run dev`、发布方式（commit + push）\n3. 用户如果问效果，提示可以看首页卡片是否出现、封面渐变是否合理"
+      },
+      "enabled": true
+    }
+  ]
+}
