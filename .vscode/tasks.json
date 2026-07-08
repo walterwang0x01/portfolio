@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "kill-port-4321",
+      "type": "shell",
+      "command": "lsof -ti:4321 | xargs kill -9 2>/dev/null; exit 0",
+      "presentation": { "reveal": "never", "panel": "shared", "close": true }
+    }
+  ]
+}

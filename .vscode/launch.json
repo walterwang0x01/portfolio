@@ -10,7 +10,8 @@
       "cwd": "${workspaceFolder}/astro-site",
       "console": "integratedTerminal",
       "consoleName": "🌐 Astro dev",
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "preLaunchTask": "kill-port-4321"
     }
   ]
 }
