@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>跳转中…</title>
-  <meta http-equiv="refresh" content="0; url=./briefing/" />
   <link rel="canonical" href="./briefing/" />
 </head>
 <body>
-  <p>正在跳转到新的 <a href="./briefing/">每日简报</a>…</p>
+  <p>正在跳转到 <a id="link" href="./briefing/">每日简报</a>…</p>
+  <script>
+    (function () {
+      var target = './briefing/' + (location.hash || '');
+      document.getElementById('link').href = target;
+      location.replace(target);
+    })();
+  </script>
 </body>
 </html>

@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  repository_dispatch:
+    types: [briefing-updated]
 
 permissions:
   contents: read
@@ -22,6 +24,14 @@ jobs:
         working-directory: astro-site
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout briefings source
+        uses: actions/checkout@v4
+        with:
+          repository: walterwang0x01/tech-learning-and-projects
+          path: briefings-src
+          sparse-checkout: |
+            learning-notes/briefings
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -29,6 +39,8 @@ jobs:
           cache-dependency-path: astro-site/package-lock.json
       - run: npm ci
       - run: npm run build
+        env:
+          BRIEFINGS_SRC: ${{ github.workspace }}/briefings-src/learning-notes/briefings
       - uses: actions/upload-pages-artifact@v3
         with:
           path: astro-site/dist

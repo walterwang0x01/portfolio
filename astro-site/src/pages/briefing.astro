@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const briefingsBase = `${import.meta.env.BASE_URL}briefings/`;
 ---
 <BaseLayout title="每日简报 — Walter's Tech Blog" description="AI Agent · 国内科技 · 国际科技每日简报" activeNav="briefing">
   <section class="container-narrow">
@@ -18,101 +20,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
     </div>
   </section>
   <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
-  <script is:inline>
-    (function () {
-      const REPO = 'walterwang0x01/tech-learning-and-projects';
-      const BRANCH = 'main';
-      const BASE_API = `https://api.github.com/repos/${REPO}/contents/learning-notes/briefings`;
-      const RAW = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/learning-notes/briefings`;
-      let topic = 'ai-agent', date = null;
-      const dateCache = {}, contentCache = {};
-      const tabs = document.getElementById('topicTabs');
-      const dateList = document.getElementById('dateList');
-      const content = document.getElementById('briefingContent');
-
-      async function fetchDates(t) {
-        if (dateCache[t]) return dateCache[t];
-        const now = new Date();
-        const y = now.getFullYear(), m = now.getMonth() + 1;
-        const dates = [];
-        for (let i = m; i >= Math.max(1, m - 2); i--) {
-          const mm = String(i).padStart(2, '0');
-          try {
-            const r = await fetch(`${BASE_API}/${t}/${y}/${mm}`, { headers: { Accept: 'application/vnd.github.v3+json' }});
-            if (!r.ok) continue;
-            const files = await r.json();
-            for (const f of files) {
-              const m2 = f.name.match(/^(\d{4}-\d{2}-\d{2})\.md$/);
-              if (m2) dates.push(m2[1]);
-            }
-          } catch (_) {}
-        }
-        dates.sort((a, b) => b.localeCompare(a));
-        dateCache[t] = dates;
-        return dates;
-      }
-
-      async function fetchContent(t, d) {
-        const k = `${t}/${d}`;
-        if (contentCache[k]) return contentCache[k];
-        const [y, mo] = d.split('-');
-        const r = await fetch(`${RAW}/${t}/${y}/${mo}/${d}.md`);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const md = await r.text();
-        contentCache[k] = md;
-        return md;
-      }
-
-      function render(md) {
-        md = md.replace(/<!--[\s\S]*?-->/g, '').replace(/^---[\s\S]*?---\n*/m, '');
-        return window.marked.parse(md, { breaks: true, gfm: true });
-      }
-
-      function setActiveButton(container, attr, value) {
-        container.querySelectorAll(`button[${attr}]`).forEach((b) => {
-          b.classList.toggle('active', b.getAttribute(attr) === value);
-        });
-      }
-
-      async function switchTopic(t) {
-        topic = t;
-        setActiveButton(tabs, 'data-topic', t);
-        content.innerHTML = '<div class="empty">加载中…</div>';
-        const dates = await fetchDates(t);
-        if (!dates.length) {
-          dateList.innerHTML = '';
-          content.innerHTML = '<div class="empty">📭 暂无简报</div>';
-          return;
-        }
-        const d = date && dates.includes(date) ? date : dates[0];
-        date = d;
-        dateList.innerHTML = dates.slice(0, 14).map((x) =>
-          `<button type="button" class="badge${x === d ? ' active' : ''}" data-date="${x}">${x.slice(5)}</button>`
-        ).join('');
-        await load(t, d);
-      }
-
-      async function load(t, d) {
-        date = d;
-        setActiveButton(dateList, 'data-date', d);
-        try {
-          const md = await fetchContent(t, d);
-          content.innerHTML = render(md);
-        } catch (e) {
-          content.innerHTML = `<div class="empty">😕 加载失败：${e.message}</div>`;
-        }
-      }
-
-      tabs.addEventListener('click', (e) => {
-        const b = e.target.closest('button[data-topic]');
-        if (b) { date = null; switchTopic(b.dataset.topic); }
-      });
-      dateList.addEventListener('click', (e) => {
-        const b = e.target.closest('button[data-date]');
-        if (b) load(topic, b.dataset.date);
-      });
-
-      switchTopic(topic);
-    })();
+  <script src={`${import.meta.env.BASE_URL}js/briefing-viewer.js`}></script>
+  <script is:inline define:vars={{ briefingsBase }}>
+    window.BriefingViewer.create({ briefingsBase });
   </script>
 </BaseLayout>
