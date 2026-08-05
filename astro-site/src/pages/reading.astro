@@ -1,0 +1,178 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const readingBase = `${import.meta.env.BASE_URL}reading/`;
+---
+<BaseLayout title="读书收藏 — Walter's Tech Blog" description="技术书籍阅读笔记与收藏" activeNav="reading">
+  <section class="container-narrow">
+    <header class="page-hero">
+      <h1>📖 读书收藏</h1>
+      <p>第三方技术书籍收藏 + 我的阅读笔记</p>
+    </header>
+
+    <div id="readingApp">
+      <div class="loading">加载中…</div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@15/marked.min.js"></script>
+  <script is:inline define:vars={{ readingBase }}>
+  (function() {
+    const app = document.getElementById('readingApp');
+
+    async function init() {
+      const resp = await fetch(readingBase + 'manifest.json');
+      const data = await resp.json();
+
+      if (!data.books || data.books.length === 0) {
+        app.innerHTML = '<p class="empty">暂无读书收藏</p>';
+        return;
+      }
+
+      let html = '';
+      for (const book of data.books) {
+        html += `<article class="book-card">
+          <div class="book-header">
+            <h2 class="book-title">${book.slug.replace(/-/g, ' ')}</h2>
+            <a href="${book.githubUrl}" target="_blank" rel="noopener" class="github-link">GitHub 原书 ↗</a>
+          </div>`;
+
+        // 我的读书笔记（原创，全文渲染）
+        if (book.hasNotes) {
+          html += `<div class="book-section">
+            <h3>📝 我的读书笔记</h3>
+            <div class="book-notes" data-src="${book.slug}/我的读书笔记.md"></div>
+          </div>`;
+        }
+
+        // 原书章节目录（链接到 GitHub）
+        if (book.chapters.length > 0) {
+          html += `<div class="book-section">
+            <h3>📑 原书目录</h3>
+            <p class="copyright-note">⚠️ 以下内容版权归原作者所有，仅供非商业性阅读参考。
+            <a href="${book.githubUrl}" target="_blank">查看原始仓库 ↗</a></p>
+            <ul class="chapter-list">`;
+          for (const ch of book.chapters) {
+            const title = ch.replace(/\.md$/, '').replace(/^\d+-/, '');
+            html += `<li><a href="#" data-file="${book.slug}/${ch}" class="chapter-link">${title}</a></li>`;
+          }
+          html += `</ul></div>`;
+        }
+
+        html += `</article>`;
+      }
+
+      app.innerHTML = html;
+
+      // 加载读书笔记全文
+      for (const el of document.querySelectorAll('.book-notes[data-src]')) {
+        try {
+          const resp = await fetch(readingBase + el.dataset.src);
+          if (resp.ok) {
+            const md = await resp.text();
+            el.innerHTML = marked.parse(md);
+          }
+        } catch (e) {
+          el.innerHTML = '<p class="error">加载失败</p>';
+        }
+      }
+
+      // 章节点击 → 加载全文到展开区域
+      document.querySelectorAll('.chapter-link').forEach(a => {
+        a.addEventListener('click', async (e) => {
+          e.preventDefault();
+          const file = a.dataset.file;
+          // 在点击项下方展开
+          let viewer = a.closest('li').querySelector('.chapter-viewer');
+          if (viewer) {
+            viewer.remove();
+            return;
+          }
+          viewer = document.createElement('div');
+          viewer.className = 'chapter-viewer post-body';
+          viewer.innerHTML = '<div class="loading">加载中…</div>';
+          a.closest('li').appendChild(viewer);
+          try {
+            const resp = await fetch(readingBase + file);
+            if (!resp.ok) throw new Error(resp.statusText);
+            const md = await resp.text();
+            viewer.innerHTML = marked.parse(md);
+          } catch (err) {
+            viewer.innerHTML = `<p class="error">加载失败: ${err.message}</p>`;
+          }
+        });
+      });
+    }
+
+    init();
+  })();
+  </script>
+
+  <style>
+    .page-hero { padding: 48px 0 24px; }
+    .page-hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    .page-hero p { color: var(--text-secondary); font-size: 14px; }
+
+    .book-card {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      background: var(--card-bg);
+    }
+    .book-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .book-title { font-size: 20px; margin: 0; }
+    .github-link {
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+    .github-link:hover { border-color: var(--primary); color: var(--primary); }
+
+    .book-section { margin-top: 20px; }
+    .book-section h3 { font-size: 16px; margin-bottom: 12px; }
+    .copyright-note {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .copyright-note a { color: var(--primary); }
+
+    .chapter-list { list-style: none; padding: 0; }
+    .chapter-list li { margin: 4px 0; }
+    .chapter-list a {
+      display: block;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 14px;
+      border: 1px solid transparent;
+      transition: background 0.15s;
+    }
+    .chapter-list a:hover { background: var(--bg-secondary); border-color: var(--border-color); }
+
+    .chapter-viewer {
+      margin-top: 12px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .loading, .error, .empty { text-align: center; color: var(--text-secondary); padding: 40px; }
+  </style>
+</BaseLayout>

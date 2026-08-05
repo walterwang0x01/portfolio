@@ -31,6 +31,8 @@ jobs:
           path: briefings-src
           sparse-checkout: |
             learning-notes/_briefings
+            learning-notes/00-ai
+            reading
           sparse-checkout-cone-mode: false
       - uses: actions/setup-node@v4
         with:
@@ -41,6 +43,7 @@ jobs:
       - run: npm run build
         env:
           BRIEFINGS_SRC: ${{ github.workspace }}/briefings-src/learning-notes/_briefings
+          NOTES_SRC: ${{ github.workspace }}/briefings-src
       - uses: actions/upload-pages-artifact@v3
         with:
           path: astro-site/dist
