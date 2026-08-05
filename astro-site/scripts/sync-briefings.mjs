@@ -17,7 +17,7 @@ const DATE_RE = /^(\d{4}-\d{2}-\d{2})\.md$/;
 const MONTHS_BACK = 3;
 const REPO = 'walterwang0x01/tech-learning-and-projects';
 const BRANCH = 'main';
-const JSDELIVR = `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/learning-notes/briefings`;
+const JSDELIVR = `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/learning-notes/_briefings`;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -25,7 +25,7 @@ const OUT = path.join(ROOT, 'public', 'briefings');
 
 const LOCAL_CANDIDATES = [
   process.env.BRIEFINGS_SRC,
-  path.resolve(ROOT, '../../tech-learning-and-projects/learning-notes/briefings'),
+  path.resolve(ROOT, '../../tech-learning-and-projects/learning-notes/_briefings'),
 ].filter(Boolean);
 
 function rmrf(dir) {
@@ -107,7 +107,7 @@ function sleep(ms) {
 }
 
 async function listDatesFromGitHubApi(topic, year, month) {
-  const url = `https://api.github.com/repos/${REPO}/contents/learning-notes/briefings/${topic}/${year}/${month}`;
+  const url = `https://api.github.com/repos/${REPO}/contents/learning-notes/_briefings/${topic}/${year}/${month}`;
   const resp = await fetch(url, {
     headers: {
       Accept: 'application/vnd.github.v3+json',

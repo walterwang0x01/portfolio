@@ -30,7 +30,7 @@ jobs:
           repository: walterwang0x01/tech-learning-and-projects
           path: briefings-src
           sparse-checkout: |
-            learning-notes/briefings
+            learning-notes/_briefings
           sparse-checkout-cone-mode: false
       - uses: actions/setup-node@v4
         with:
@@ -40,7 +40,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          BRIEFINGS_SRC: ${{ github.workspace }}/briefings-src/learning-notes/briefings
+          BRIEFINGS_SRC: ${{ github.workspace }}/briefings-src/learning-notes/_briefings
       - uses: actions/upload-pages-artifact@v3
         with:
           path: astro-site/dist
