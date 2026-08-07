@@ -6,6 +6,7 @@ import SubscribeCTA from '@/components/SubscribeCTA.astro';
 import PostCard from '@/components/PostCard.astro';
 import HeroParticles from '@/components/HeroParticles.astro';
 import TypewriterTitle from '@/components/TypewriterTitle.astro';
+import '@/styles/ai-notes.css';
 
 const all = await getCollection('blog', ({ data }) => !data.draft);
 const posts = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
@@ -64,6 +65,40 @@ const itemListLd = {
           <kbd class="kbd">⌘</kbd><kbd class="kbd">K</kbd> 搜索
         </button>
       </div>
+    </div>
+  </section>
+
+  <section class="container-narrow entry-section">
+    <div class="entry-grid">
+      <a class="entry-card entry-card--notes" href={`${BASE}notes/`}>
+        <div class="entry-top">
+          <span class="entry-emoji">🧠</span>
+          <span class="entry-badge">171 篇 · 198 题</span>
+        </div>
+        <h3>AI 知识库</h3>
+        <p>从反向传播推导到生产级 Agent 系统。按学习依赖关系编排，带自测题和阅读进度。</p>
+        <ul class="entry-feats">
+          <li>🗺️ 5 阶段学习路线</li>
+          <li>✍️ 198 道自测题</li>
+          <li>📖 全文阅读 + 公式渲染</li>
+        </ul>
+        <span class="entry-cta">进入知识库 →</span>
+      </a>
+
+      <a class="entry-card entry-card--demos" href={`${BASE}demos/`}>
+        <div class="entry-top">
+          <span class="entry-emoji">🔬</span>
+          <span class="entry-badge">4 个可交互</span>
+        </div>
+        <h3>原理可视化</h3>
+        <p>把公式变成能拖动的东西。纯前端计算，调滑块就能看到机制如何变化。</p>
+        <ul class="entry-feats">
+          <li>注意力热力图</li>
+          <li>反向传播梯度流（可复现死亡 ReLU）</li>
+          <li>KV Cache 显存 · TIES 模型合并</li>
+        </ul>
+        <span class="entry-cta">打开演示 →</span>
+      </a>
     </div>
   </section>
 

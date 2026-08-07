@@ -101,11 +101,11 @@
     const quizDone = Object.keys(state.progress.quiz).length;
 
     let html = `
-      <div class="stats-row">
-        <div class="stat"><b>${count}</b><span>篇笔记</span></div>
-        <div class="stat"><b>${quizTotal}</b><span>道自测题</span></div>
-        <div class="stat accent"><b>${readTotal}</b><span>已读</span></div>
-        <div class="stat accent"><b>${quizDone}</b><span>已自测</span></div>
+      <div class="ai-stats">
+        <div class="ai-stat"><b>${count}</b><span>篇笔记</span></div>
+        <div class="ai-stat"><b>${quizTotal}</b><span>道自测题</span></div>
+        <div class="ai-stat accent"><b>${readTotal}</b><span>已读</span></div>
+        <div class="ai-stat accent"><b>${quizDone}</b><span>已自测</span></div>
       </div>
       <p class="roadmap-hint">按依赖关系编号，建议顺序阅读 · 点击阶段展开篇目</p>
       <ol class="roadmap">`;
@@ -407,7 +407,7 @@
     const deck = state.quizDeck;
 
     if (deck.length === 0) {
-      host.innerHTML = '<div class="empty">该范围暂无自测题</div>';
+      host.innerHTML = '<div class="ai-empty">该范围暂无自测题</div>';
       return;
     }
 

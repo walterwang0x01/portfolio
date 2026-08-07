@@ -4,9 +4,10 @@ import '@/styles/ai-notes.css';
 
 const readingBase = `${import.meta.env.BASE_URL}reading/`;
 ---
-<BaseLayout title="读书收藏 — Walter's Tech Blog" description="技术书籍阅读笔记与收藏" activeNav="reading">
+<BaseLayout title="读书收藏 — Walter's Tech Blog" description="技术书籍阅读笔记与收藏" activeNav="reading"
+  ogImage={`${import.meta.env.BASE_URL}og-page/reading.png`}>
   <section class="ai-container">
-    <header class="page-hero">
+    <header class="ai-page-hero">
       <h1>📖 读书收藏</h1>
       <p>第三方技术书籍收藏 + 我的阅读笔记</p>
     </header>
@@ -26,7 +27,7 @@ const readingBase = `${import.meta.env.BASE_URL}reading/`;
       const data = await resp.json();
 
       if (!data.books || data.books.length === 0) {
-        app.innerHTML = '<p class="empty">暂无读书收藏</p>';
+        app.innerHTML = '<p class="ai-empty">暂无读书收藏</p>';
         return;
       }
 

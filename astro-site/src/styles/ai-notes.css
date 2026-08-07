@@ -83,7 +83,7 @@ html[data-theme='dark'] .view-tab.active {
   padding: 0 24px 72px;
 }
 
-.loading, .demo-empty, .empty {
+.loading, .demo-empty, .ai-empty {
   text-align: center;
   color: var(--text-secondary);
   padding: 56px 0;
@@ -94,20 +94,20 @@ html[data-theme='dark'] .view-tab.active {
    知识库：统计条
    ========================================================================== */
 
-.stats-row {
+.ai-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin: 28px 0 22px;
 }
-.stat {
+.ai-stat {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--ai-radius-sm);
   padding: 16px 12px;
   text-align: center;
 }
-.stat b {
+.ai-stat b {
   display: block;
   font-size: 26px;
   font-weight: 700;
@@ -116,13 +116,13 @@ html[data-theme='dark'] .view-tab.active {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
 }
-.stat span {
+.ai-stat span {
   display: block;
   margin-top: 4px;
   font-size: 12px;
   color: var(--text-secondary);
 }
-.stat.accent b { color: var(--primary); }
+.ai-stat.accent b { color: var(--primary); }
 
 .roadmap-hint {
   text-align: center;
@@ -580,14 +580,14 @@ html[data-theme='dark'] .stage:hover { box-shadow: 0 2px 12px rgba(0, 0, 0, .3);
    可视化演示页
    ========================================================================== */
 
-.demos-page .page-hero { padding: 56px 0 24px; text-align: center; }
-.demos-page .page-hero h1 {
+.demos-page .ai-page-hero { padding: 56px 0 24px; text-align: center; }
+.demos-page .ai-page-hero h1 {
   font-size: clamp(28px, 4vw, 36px);
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0 0 10px;
 }
-.demos-page .page-hero p {
+.demos-page .ai-page-hero p {
   color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.7;
@@ -907,7 +907,7 @@ html[data-theme='dark'] .bp-table tr.warn td { color: #fbbf24; }
 @media (max-width: 640px) {
   .notes-hero { padding: 36px 16px 20px; }
   .ai-container { padding: 0 16px 56px; }
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .ai-stats { grid-template-columns: repeat(2, 1fr); }
   .view-tabs, .demo-tabs { width: 100%; justify-content: center; }
   .view-tab, .demo-tab { padding: 8px 14px; font-size: 13px; }
   .stage-head { grid-template-columns: 34px 1fr 16px; gap: 10px; padding: 15px 14px; }
@@ -925,9 +925,9 @@ html[data-theme='dark'] .bp-table tr.warn td { color: #fbbf24; }
 /* ==========================================================================
    读书收藏页
    ========================================================================== */
-.page-hero { padding: 48px 0 24px; }
-.page-hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
-.page-hero p { color: var(--text-secondary); font-size: 14px; }
+.ai-page-hero { padding: 48px 0 24px; }
+.ai-page-hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.ai-page-hero p { color: var(--text-secondary); font-size: 14px; }
 
 .book-card {
   border: 1px solid var(--border-color);
@@ -989,7 +989,7 @@ html[data-theme='dark'] .bp-table tr.warn td { color: #fbbf24; }
   overflow-y: auto;
 }
 
-.loading, .error, .empty { text-align: center; color: var(--text-secondary); padding: 40px; }
+.loading, .error, .ai-empty { text-align: center; color: var(--text-secondary); padding: 40px; }
 
 /* ==========================================================================
    Markdown 阅读增强：进度条 / TOC / 代码块 / 公式 / Mermaid / 内嵌 demo
@@ -1242,4 +1242,110 @@ html[data-theme='dark'] .bp-table tr.warn td { color: #fbbf24; }
 @media (max-width: 900px) {
   .read-progress { top: 56px; }
   .read-meta { width: 100%; margin-left: 0; margin-top: 4px; }
+}
+
+/* ==========================================================================
+   首页：知识库 / 可视化 入口卡片
+   ========================================================================== */
+
+.entry-section { padding: 8px 24px 44px; }
+
+.entry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.entry-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--card-bg);
+  text-decoration: none;
+  transition: border-color .18s, transform .18s, box-shadow .18s;
+  position: relative;
+  overflow: hidden;
+}
+.entry-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--primary);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.entry-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border-color));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .07);
+}
+html[data-theme='dark'] .entry-card:hover { box-shadow: 0 6px 24px rgba(0, 0, 0, .4); }
+.entry-card:hover::before { opacity: 1; }
+
+.entry-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.entry-emoji { font-size: 30px; line-height: 1; }
+.entry-badge {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.entry-card h3 {
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  color: var(--text-primary);
+}
+.entry-card > p {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+}
+
+.entry-feats {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+.entry-feats > li {
+  padding: 3px 0 3px 14px;
+  position: relative;
+  line-height: 1.6;
+}
+.entry-feats > li::before {
+  content: '·';
+  position: absolute;
+  left: 2px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.entry-cta {
+  margin-top: auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  transition: gap .18s;
+}
+
+@media (max-width: 640px) {
+  .entry-section { padding: 4px 16px 32px; }
+  .entry-card { padding: 18px 18px 16px; }
 }

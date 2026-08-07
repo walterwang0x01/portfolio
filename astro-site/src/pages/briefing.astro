@@ -3,7 +3,8 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 
 const briefingsBase = `${import.meta.env.BASE_URL}briefings/`;
 ---
-<BaseLayout title="每日简报 — Walter's Tech Blog" description="AI Agent · 国内科技 · 国际科技每日简报" activeNav="briefing">
+<BaseLayout title="每日简报 — Walter's Tech Blog" description="AI Agent · 国内科技 · 国际科技每日简报" activeNav="briefing"
+  ogImage={`${import.meta.env.BASE_URL}og-page/briefing.png`}>
   <section class="container-narrow">
     <header class="page-hero">
       <h1>📰 每日技术简报</h1>
