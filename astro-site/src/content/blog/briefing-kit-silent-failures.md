@@ -15,7 +15,7 @@ Then I noticed the same article appearing in two different briefings. Then a sou
 
 After fixing each failure, I extracted the engine into [briefing-kit](https://github.com/walterwang0x01/briefing-kit) — an open-source Python library with 237 tests that encode every lesson. Zero external dependencies. Pure stdlib.
 
-![Pipeline Architecture](/images/briefing-kit/pipeline-architecture.svg)
+![Pipeline Architecture](/portfolio/images/briefing-kit/pipeline-architecture.svg)
 
 ## The Architecture (30 Seconds)
 
@@ -32,7 +32,7 @@ The engine handles everything **except** the AI curation. Your agent reads candi
 
 ## Failure #1: Parallel Curate Breaks Cross-Topic Dedup
 
-![Parallel Race Condition](/images/briefing-kit/failure-1-parallel-race.svg)
+![Parallel Race Condition](/portfolio/images/briefing-kit/failure-1-parallel-race.svg)
 
 **What I saw**: Same article in both `ai-agent` and `china-tech` briefings on the same day.
 
@@ -57,7 +57,7 @@ for item in scored_items:
 
 ## Failure #2: Circuit Breaker Never Self-Heals
 
-![Circuit Breaker State Machine](/images/briefing-kit/failure-2-circuit-breaker.svg)
+![Circuit Breaker State Machine](/portfolio/images/briefing-kit/failure-2-circuit-breaker.svg)
 
 **What I saw**: A source got tripped (3 consecutive failures) and stayed tripped for 3 weeks, long after the source recovered.
 
@@ -82,7 +82,7 @@ def should_probe(source_id: str, health: dict) -> bool:
 
 ## Failure #3: Push Count Misses Free-Form Items
 
-![Count Miss](/images/briefing-kit/failure-3-count-miss.svg)
+![Count Miss](/portfolio/images/briefing-kit/failure-3-count-miss.svg)
 
 **What I saw**: Bark notification says "5 items" but the briefing actually has 8 items.
 
@@ -106,7 +106,7 @@ def count_briefing_items(md: str) -> int:
 
 ## Failure #4: Web Search Links Bypass All Dedup
 
-![Dedup Bypass](/images/briefing-kit/failure-4-dedup-bypass.svg)
+![Dedup Bypass](/portfolio/images/briefing-kit/failure-4-dedup-bypass.svg)
 
 **What I saw**: A URL from yesterday's briefing reappears today.
 
@@ -128,7 +128,7 @@ def check_url_reuse(url: str, topic: str, date: str) -> list[dict]:
 
 ## Failure #5: HTTP 200 + Valid XML + Zero Items = "Success"
 
-![Silent Empty](/images/briefing-kit/failure-5-silent-empty.svg)
+![Silent Empty](/portfolio/images/briefing-kit/failure-5-silent-empty.svg)
 
 **What I saw**: Pipeline reports complete success. But no briefing file was produced today.
 
