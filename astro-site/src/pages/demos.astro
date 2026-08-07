@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import '@/styles/ai-notes.css';
 
 const notesUrl = `${import.meta.env.BASE_URL}notes/`;
 ---
@@ -8,7 +9,7 @@ const notesUrl = `${import.meta.env.BASE_URL}notes/`;
   description="交互式演示：注意力机制热力图、反向传播梯度流、KV Cache 显存计算、TIES 模型合并符号选举"
   activeNav="demos"
 >
-  <section class="container-narrow demos-page">
+  <section class="ai-container demos-page">
     <header class="page-hero">
       <h1>🔬 AI 原理可视化</h1>
       <p>四个可交互的演示，把公式变成能拖动的东西。看不懂的地方回<a href={notesUrl}>知识库</a>查对应笔记。</p>
@@ -169,157 +170,4 @@ const notesUrl = `${import.meta.env.BASE_URL}notes/`;
 
   <script src={`${import.meta.env.BASE_URL}js/ai-demos.js`}></script>
 
-  <style>
-    .container-narrow { max-width: 860px; margin: 0 auto; padding: 0 24px 60px; }
-    .page-hero { padding: 40px 0 20px; text-align: center; }
-    .page-hero h1 { font-size: 28px; margin-bottom: 8px; }
-    .page-hero p { color: var(--text-secondary); font-size: 14px; }
-
-    .demo-tabs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
-    .demo-tab {
-      padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500;
-      border: 1px solid var(--border-color); background: var(--card-bg);
-      color: var(--text-secondary); cursor: pointer; transition: var(--transition);
-    }
-    .demo-tab:hover { border-color: var(--primary); color: var(--primary); }
-    .demo-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-    .demo-panel h2 { font-size: 20px; margin-bottom: 10px; }
-    .demo-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px; }
-    .demo-desc code { font-size: 13px; }
-
-    .demo-controls {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px; padding: 16px; margin-bottom: 14px;
-      background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 10px;
-    }
-    .demo-controls label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--text-secondary); }
-    .demo-controls label.ctl-full { grid-column: 1 / -1; }
-    .demo-controls label.ctl-check { flex-direction: row; align-items: center; gap: 8px; }
-    .demo-controls b { color: var(--primary); font-variant-numeric: tabular-nums; }
-    .demo-controls input[type="text"], .demo-controls select {
-      padding: 7px 10px; font-size: 13px; border-radius: 6px;
-      border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-primary);
-    }
-    .demo-controls input[type="range"] { accent-color: var(--primary); }
-
-    .demo-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-    .btn-primary, .btn-ghost {
-      padding: 7px 16px; font-size: 13px; border-radius: 6px; cursor: pointer;
-      border: 1px solid var(--border-color); transition: var(--transition);
-    }
-    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .btn-ghost { background: var(--card-bg); color: var(--text-secondary); }
-    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
-
-    .demo-output { margin-bottom: 20px; overflow-x: auto; }
-    .demo-empty { text-align: center; color: var(--text-secondary); padding: 30px; }
-    .demo-readout {
-      margin-top: 14px; padding: 14px 16px; font-size: 13px; line-height: 1.8;
-      background: var(--bg-secondary); border: 1px solid var(--border-color);
-      border-radius: 10px; color: var(--text-secondary);
-    }
-    .demo-readout b { color: var(--text-primary); }
-    .warn-text { color: #e0803a; }
-
-    .demo-note {
-      border: 1px solid var(--border-color); border-radius: 10px;
-      padding: 14px 16px; background: var(--card-bg); font-size: 13px;
-    }
-    .demo-note summary { cursor: pointer; font-weight: 600; color: var(--text-primary); }
-    .demo-note ul { margin: 12px 0 0; padding-left: 20px; color: var(--text-secondary); line-height: 1.9; }
-    .demo-note p { margin-top: 12px; color: var(--text-secondary); }
-
-    /* 注意力热力图 */
-    .heat-table { border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; }
-    .heat-table th {
-      padding: 5px 7px; font-weight: 500; font-size: 11px;
-      color: var(--text-secondary); white-space: nowrap;
-    }
-    .heat-table thead th { border-bottom: 1px solid var(--border-color); }
-    .heat-table tbody th { text-align: right; border-right: 1px solid var(--border-color); }
-    .heat-table td {
-      padding: 6px 8px; text-align: center; color: #fff; min-width: 44px;
-      font-weight: 500; text-shadow: 0 0 3px rgba(0,0,0,.5);
-    }
-    .heat-table td.masked { background: var(--bg-secondary); color: var(--text-secondary); text-shadow: none; }
-
-    /* 反向传播 */
-    .bp-flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
-    .bp-node {
-      border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px;
-      background: var(--card-bg); text-align: center; min-width: 68px;
-    }
-    .bp-node.loss { border-color: var(--primary); }
-    .bp-label { display: block; font-size: 10px; color: var(--text-secondary); }
-    .bp-node b { font-size: 13px; font-variant-numeric: tabular-nums; }
-    .bp-op { font-size: 10px; color: var(--text-secondary); text-align: center; padding: 0 2px; }
-    .bp-op small { font-size: 9px; opacity: .8; }
-
-    .bp-back {
-      border: 1px solid var(--border-color); border-radius: 10px;
-      padding: 14px 16px; background: var(--bg-secondary);
-    }
-    .bp-back-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
-    .bp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .bp-table td { padding: 5px 4px; border-bottom: 1px solid var(--border-color); }
-    .bp-table td:first-child { color: var(--text-secondary); font-family: ui-monospace, monospace; }
-    .bp-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
-    .bp-table tr.warn td { color: #e0803a; }
-
-    .bp-chart { margin-top: 14px; }
-    .bp-chart-title { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
-    .bp-chart svg { width: 100%; height: 70px; color: var(--primary); }
-
-    /* KV Cache */
-    .kv-formula {
-      font-size: 12px; font-family: ui-monospace, monospace; line-height: 1.8;
-      padding: 12px 14px; background: var(--bg-secondary);
-      border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 14px;
-      color: var(--text-secondary);
-    }
-    .kv-formula-nums { color: var(--primary); }
-    .kv-headline {
-      display: flex; justify-content: space-between; align-items: baseline;
-      padding: 14px 16px; margin-bottom: 14px; border-radius: 8px;
-      background: var(--primary); color: #fff; font-size: 13px;
-    }
-    .kv-headline b { font-size: 22px; font-variant-numeric: tabular-nums; }
-    .kv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .kv-table th, .kv-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
-    .kv-table th { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
-    .kv-table tr.hl { background: var(--bg-secondary); font-weight: 600; }
-    .kv-table td:nth-child(2), .kv-table td:nth-child(3) { font-variant-numeric: tabular-nums; }
-    .kv-bar { width: 34%; }
-    .kv-bar i { display: block; height: 8px; background: var(--primary); border-radius: 4px; opacity: .7; }
-
-    /* TIES */
-    .ties-table { width: 100%; border-collapse: collapse; font-size: 11px; font-variant-numeric: tabular-nums; }
-    .ties-table th {
-      padding: 6px 8px; font-size: 11px; font-weight: 500;
-      color: var(--text-secondary); text-align: right; white-space: nowrap;
-    }
-    .ties-table th small { display: block; font-size: 9px; opacity: .7; font-weight: 400; }
-    .ties-table thead th { text-align: center; border-bottom: 1px solid var(--border-color); }
-    .ties-table td { padding: 7px 6px; text-align: center; min-width: 42px; border-radius: 3px; }
-    .ties-table td.zero { color: var(--text-secondary); opacity: .4; }
-    .ties-table tr.sep th {
-      text-align: left; padding: 12px 8px 6px; font-size: 11px;
-      color: var(--primary); font-weight: 600;
-    }
-    .ties-table tr.sep.compare th { color: var(--text-secondary); }
-    .ties-table tr.signs td { font-size: 14px; font-weight: 700; color: var(--text-primary); }
-    .ties-table tr.result td { outline: 1px solid var(--primary); outline-offset: -1px; }
-
-    .demos-footer {
-      margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border-color);
-      font-size: 12px; color: var(--text-secondary); text-align: center;
-    }
-
-    @media (max-width: 700px) {
-      .container-narrow { padding: 0 14px 40px; }
-      .demo-controls { grid-template-columns: 1fr; }
-      .bp-flow { font-size: 11px; }
-    }
-  </style>
 </BaseLayout>

@@ -95,10 +95,10 @@
       <div class="stats-row">
         <div class="stat"><b>${count}</b><span>篇笔记</span></div>
         <div class="stat"><b>${quizTotal}</b><span>道自测题</span></div>
-        <div class="stat"><b>${readTotal}</b><span>已读</span></div>
-        <div class="stat"><b>${quizDone}</b><span>已自测</span></div>
+        <div class="stat accent"><b>${readTotal}</b><span>已读</span></div>
+        <div class="stat accent"><b>${quizDone}</b><span>已自测</span></div>
       </div>
-      <p class="roadmap-hint">按依赖关系编号，建议顺序阅读。点击阶段展开篇目。</p>
+      <p class="roadmap-hint">按依赖关系编号，建议顺序阅读 · 点击阶段展开篇目</p>
       <ol class="roadmap">`;
 
     roadmap.forEach((stage, i) => {
@@ -106,18 +106,26 @@
       const pct = stage.notes ? Math.round((readCount / stage.notes) * 100) : 0;
       html += `
         <li class="stage" data-stage="${esc(stage.id)}">
-          <div class="stage-head" role="button" tabindex="0">
-            <span class="stage-emoji">${stage.emoji}</span>
+          <div class="stage-head" role="button" tabindex="0" aria-expanded="false">
+            <div class="stage-index">
+              <span class="stage-emoji">${stage.emoji}</span>
+              <span class="stage-num">${String(i).padStart(2, '0')}</span>
+            </div>
             <div class="stage-main">
-              <div class="stage-title">${esc(stage.label)}
-                <span class="stage-meta">${stage.notes} 篇 · ${stage.quizCount} 题 · ${fmtMinutes(stage.minutes)}</span>
+              <div class="stage-titlebar">
+                <span class="stage-title">${esc(stage.label)}</span>
+                <span class="stage-meta">
+                  <span>${stage.notes} 篇</span><span>${stage.quizCount} 题</span><span>${fmtMinutes(stage.minutes)}</span>
+                </span>
               </div>
               <div class="stage-tagline">${esc(stage.tagline)}</div>
-              <div class="stage-why">💡 ${esc(stage.why)}</div>
-              <div class="progress-bar"><i style="width:${pct}%"></i></div>
-              <div class="progress-text">${readCount} / ${stage.notes} 已读（${pct}%）</div>
+              <div class="stage-why">${esc(stage.why)}</div>
+              <div class="stage-progress">
+                <div class="progress-bar"><i style="width:${pct}%"></i></div>
+                <div class="progress-text">${readCount} / ${stage.notes} 已读 · ${pct}%</div>
+              </div>
             </div>
-            <span class="stage-caret">▸</span>
+            <span class="stage-caret">›</span>
           </div>
           <ul class="stage-files" hidden></ul>
         </li>`;
@@ -142,16 +150,18 @@
           ul.innerHTML = stage.files.map((f) => {
             const done = state.progress.read[f] ? ' done' : '';
             const parts = f.split('/');
-            const sub = parts.length > 2 ? prettify(parts[1]) + ' / ' : '';
+            const sub = parts.length > 2 ? prettify(parts[1]) + ' /' : '';
             return `<li><a href="#read/${encodeURIComponent(f)}" class="file-link${done}" data-file="${esc(f)}">
               <span class="file-check">${state.progress.read[f] ? '✓' : '○'}</span>
-              <span class="file-sub">${esc(sub)}</span>${esc(prettify(parts[parts.length - 1]))}
+              <span><span class="file-sub">${esc(sub)}</span>${esc(prettify(parts[parts.length - 1]))}</span>
             </a></li>`;
           }).join('');
           ul.dataset.filled = '1';
         }
-        ul.hidden = !ul.hidden;
-        head.querySelector('.stage-caret').textContent = ul.hidden ? '▸' : '▾';
+        const nowOpen = ul.hidden;
+        ul.hidden = !nowOpen;
+        li.classList.toggle('open', nowOpen);
+        head.setAttribute('aria-expanded', String(nowOpen));
       };
       head.addEventListener('click', toggle);
       head.addEventListener('keydown', (e) => {

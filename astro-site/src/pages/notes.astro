@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import '@/styles/ai-notes.css';
 
 const notesBase = `${import.meta.env.BASE_URL}notes/`;
 ---
@@ -10,21 +11,19 @@ const notesBase = `${import.meta.env.BASE_URL}notes/`;
 >
   <section class="notes-shell">
     <header class="notes-hero">
-      <h1>🧠 AI 知识库</h1>
-      <p>从机器学习原理到生产级 Agent 系统 — 171 篇原创笔记 · 198 道自测题</p>
+      <h1>AI 知识库</h1>
+      <p class="hero-sub">从反向传播推导到生产级 Agent 系统<br />171 篇原创笔记 · 198 道自测题 · 按学习依赖关系编排</p>
       <nav class="view-tabs" role="tablist" aria-label="视图切换">
-        <button class="view-tab active" data-view-tab="roadmap" role="tab">🗺️ 学习路线</button>
-        <button class="view-tab" data-view-tab="read" role="tab">📖 阅读</button>
-        <button class="view-tab" data-view-tab="quiz" role="tab">✍️ 自测</button>
+        <button class="view-tab active" data-view-tab="roadmap" role="tab">学习路线</button>
+        <button class="view-tab" data-view-tab="read" role="tab">阅读</button>
+        <button class="view-tab" data-view-tab="quiz" role="tab">自测</button>
       </nav>
     </header>
 
-    <!-- 视图一：学习路线图 -->
-    <div id="view-roadmap" class="view container-narrow" role="tabpanel">
+    <div id="view-roadmap" class="view ai-container" role="tabpanel">
       <div id="roadmapBody"><div class="loading">加载中…</div></div>
     </div>
 
-    <!-- 视图二：阅读 -->
     <div id="view-read" class="view view-read" role="tabpanel" hidden>
       <aside class="notes-sidebar" id="notesSidebar">
         <div class="sidebar-header">
@@ -38,14 +37,13 @@ const notesBase = `${import.meta.env.BASE_URL}notes/`;
         <button class="sidebar-toggle" id="sidebarToggle">☰ 目录</button>
         <article id="notesContent" class="post-body">
           <div class="pick-hint">
-            <p>← 从左侧目录选一篇开始，或回到<button class="link-btn" data-view-tab="roadmap">学习路线</button>按顺序阅读</p>
+            <p>从左侧目录选一篇开始<br />或回到<button class="link-btn" data-view-tab="roadmap">学习路线</button>按顺序阅读</p>
           </div>
         </article>
       </main>
     </div>
 
-    <!-- 视图三：自测 -->
-    <div id="view-quiz" class="view container-narrow" role="tabpanel" hidden>
+    <div id="view-quiz" class="view ai-container" role="tabpanel" hidden>
       <div id="quizBody"><div class="loading">加载中…</div></div>
     </div>
   </section>
@@ -55,201 +53,4 @@ const notesBase = `${import.meta.env.BASE_URL}notes/`;
   <script is:inline define:vars={{ notesBase }}>
     window.AINotes.init({ notesBase });
   </script>
-
-  <style>
-    .notes-shell { min-height: calc(100vh - 64px); }
-    .notes-hero {
-      padding: 40px 24px 20px;
-      max-width: 1000px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .notes-hero h1 { font-size: 28px; margin-bottom: 8px; }
-    .notes-hero p { color: var(--text-secondary); font-size: 14px; }
-
-    .view-tabs {
-      display: flex; gap: 8px; justify-content: center;
-      margin-top: 20px; flex-wrap: wrap;
-    }
-    .view-tab {
-      padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 500;
-      border: 1px solid var(--border-color); background: var(--card-bg);
-      color: var(--text-secondary); cursor: pointer; transition: var(--transition);
-    }
-    .view-tab:hover { border-color: var(--primary); color: var(--primary); }
-    .view-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-    .container-narrow { max-width: 820px; margin: 0 auto; padding: 8px 24px 60px; }
-    .loading, .error, .empty { text-align: center; color: var(--text-secondary); padding: 48px 0; }
-
-    /* ---------- 统计条 ---------- */
-    .stats-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 16px 0 24px; }
-    .stat {
-      background: var(--card-bg); border: 1px solid var(--border-color);
-      border-radius: 10px; padding: 12px 20px; text-align: center; min-width: 96px;
-    }
-    .stat b { display: block; font-size: 22px; color: var(--primary); }
-    .stat span { font-size: 12px; color: var(--text-secondary); }
-    .roadmap-hint { text-align: center; font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
-
-    /* ---------- 路线图 ---------- */
-    .roadmap { list-style: none; padding: 0; margin: 0; }
-    .stage {
-      border: 1px solid var(--border-color); border-radius: 12px;
-      background: var(--card-bg); overflow: hidden; margin-bottom: 4px;
-    }
-    .stage-head {
-      display: flex; gap: 14px; align-items: flex-start;
-      padding: 16px 18px; cursor: pointer; transition: background .15s;
-    }
-    .stage-head:hover { background: var(--bg-secondary); }
-    .stage-emoji { font-size: 26px; line-height: 1; flex-shrink: 0; }
-    .stage-main { flex: 1; min-width: 0; }
-    .stage-title { font-size: 16px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
-    .stage-meta { font-size: 12px; font-weight: 400; color: var(--text-secondary); }
-    .stage-tagline { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-    .stage-why { font-size: 12px; color: var(--text-secondary); margin-top: 6px; opacity: .85; }
-    .stage-caret { color: var(--text-secondary); font-size: 14px; flex-shrink: 0; }
-
-    .progress-bar {
-      height: 5px; background: var(--border-color); border-radius: 3px;
-      overflow: hidden; margin-top: 10px;
-    }
-    .progress-bar i { display: block; height: 100%; background: var(--primary); transition: width .3s; }
-    .progress-text { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
-
-    .stage-arrow { text-align: center; color: var(--text-secondary); font-size: 18px; margin: 2px 0 6px; list-style: none; }
-
-    .stage-files { list-style: none; margin: 0; padding: 0 18px 14px 58px; }
-    .stage-files li { margin: 2px 0; }
-    .file-link {
-      display: flex; gap: 8px; align-items: baseline;
-      font-size: 13px; color: var(--text-primary); text-decoration: none;
-      padding: 5px 8px; border-radius: 6px;
-    }
-    .file-link:hover { background: var(--bg-secondary); }
-    .file-link.done { color: var(--text-secondary); }
-    .file-check { color: var(--primary); font-size: 11px; flex-shrink: 0; }
-    .file-sub { color: var(--text-secondary); font-size: 11px; }
-
-    .roadmap-note {
-      margin-top: 24px; padding: 14px 16px; border-radius: 10px;
-      background: var(--bg-secondary); border: 1px solid var(--border-color);
-      font-size: 13px; color: var(--text-secondary); line-height: 1.7;
-    }
-    .roadmap-note code { font-size: 12px; }
-
-    /* ---------- 阅读视图 ---------- */
-    .view-read { display: flex; }
-    .notes-sidebar {
-      width: 290px; flex-shrink: 0; padding: 16px;
-      border-right: 1px solid var(--border-color); background: var(--bg-secondary);
-      position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
-    }
-    .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .sidebar-header h2 { font-size: 15px; margin: 0; }
-    .sidebar-close { display: none; background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-secondary); }
-    #notesSearch {
-      width: 100%; padding: 7px 11px; margin-bottom: 12px; font-size: 13px;
-      border: 1px solid var(--border-color); border-radius: 6px;
-      background: var(--card-bg); color: var(--text-primary);
-    }
-    .notes-main { flex: 1; min-width: 0; padding: 24px 40px 60px; max-width: 860px; }
-    .sidebar-toggle {
-      display: none; margin-bottom: 14px; padding: 7px 14px; font-size: 13px;
-      border: 1px solid var(--border-color); border-radius: 6px;
-      background: var(--card-bg); color: var(--text-secondary); cursor: pointer;
-    }
-    .pick-hint { text-align: center; padding: 60px 0; color: var(--text-secondary); }
-    .link-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-size: inherit; text-decoration: underline; padding: 0 2px; }
-
-    .tree details details { margin-left: 12px; }
-    .tree summary {
-      cursor: pointer; font-size: 13px; font-weight: 600; padding: 4px 0;
-      color: var(--text-primary); list-style: none;
-    }
-    .tree summary::-webkit-details-marker { display: none; }
-    .tree summary::before { content: '▸ '; color: var(--text-secondary); }
-    .tree details[open] > summary::before { content: '▾ '; }
-    .tree ul { list-style: none; padding-left: 15px; margin: 2px 0; }
-    .tree a {
-      display: block; font-size: 13px; color: var(--text-secondary);
-      text-decoration: none; padding: 3px 8px; border-radius: 4px;
-    }
-    .tree a:hover { background: var(--card-bg); color: var(--text-primary); }
-    .tree a.active { background: var(--primary); color: #fff; }
-    .tree a.done::after { content: ' ✓'; color: var(--primary); font-size: 11px; }
-    .tree a.active.done::after { color: #fff; }
-
-    .note-actions {
-      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
-      padding-bottom: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color);
-    }
-    .btn-primary, .btn-ghost {
-      padding: 7px 14px; font-size: 13px; border-radius: 6px; cursor: pointer;
-      text-decoration: none; display: inline-block; border: 1px solid var(--border-color);
-      transition: var(--transition);
-    }
-    .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .btn-primary:hover { opacity: .9; }
-    .btn-ghost { background: var(--card-bg); color: var(--text-secondary); }
-    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
-    .btn-ghost[disabled] { opacity: .4; cursor: not-allowed; }
-
-    /* ---------- 自测视图 ---------- */
-    .quiz-toolbar { margin: 12px 0 20px; }
-    .quiz-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-    .chip {
-      padding: 5px 12px; font-size: 12px; border-radius: 14px; cursor: pointer;
-      border: 1px solid var(--border-color); background: var(--card-bg);
-      color: var(--text-secondary); transition: var(--transition);
-    }
-    .chip:hover { border-color: var(--primary); color: var(--primary); }
-    .chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .quiz-progress { font-size: 12px; color: var(--text-secondary); }
-
-    .quiz-card {
-      border: 1px solid var(--border-color); border-radius: 12px;
-      background: var(--card-bg); padding: 24px;
-    }
-    .quiz-source { font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
-    .quiz-q { font-size: 17px; line-height: 1.7; font-weight: 500; }
-    .quiz-tip {
-      font-size: 12px; color: var(--text-secondary); margin-top: 12px;
-      padding: 10px 12px; background: var(--bg-secondary); border-radius: 8px;
-    }
-    .quiz-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
-    .quiz-reveal {
-      margin-top: 18px; padding: 16px; max-height: 520px; overflow-y: auto;
-      border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary);
-    }
-    .quiz-grade {
-      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
-      margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-color);
-      font-size: 12px; color: var(--text-secondary);
-    }
-    .grade {
-      padding: 5px 12px; font-size: 12px; border-radius: 14px; cursor: pointer;
-      border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-secondary);
-    }
-    .grade:hover { border-color: var(--primary); }
-    .grade.on { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .quiz-nav {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border-color);
-    }
-    .quiz-counter { font-size: 12px; color: var(--text-secondary); }
-
-    @media (max-width: 860px) {
-      .notes-sidebar {
-        position: fixed; left: -100%; top: 0; z-index: 200;
-        width: 84%; max-width: 300px; height: 100vh; transition: left .2s;
-      }
-      .notes-sidebar.open { left: 0; box-shadow: 0 0 40px rgba(0,0,0,.3); }
-      .sidebar-close, .sidebar-toggle { display: block; }
-      .notes-main { padding: 16px; }
-      .container-narrow { padding: 8px 16px 48px; }
-      .stage-files { padding-left: 20px; }
-    }
-  </style>
 </BaseLayout>
