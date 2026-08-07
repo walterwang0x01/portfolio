@@ -7,7 +7,7 @@ import CommandPalette from '@/components/CommandPalette.astro';
 interface Props {
   title: string;
   description?: string;
-  activeNav?: 'blog' | 'briefing' | 'notes' | 'reading';
+  activeNav?: 'blog' | 'briefing' | 'notes' | 'reading' | 'demos';
   ogImage?: string;
 }
 
@@ -60,6 +60,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
           <li><a href={BASE} class={activeNav === 'blog' ? 'active' : ''}>博客</a></li>
           <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
           <li><a href={`${BASE}notes/`} class={activeNav === 'notes' ? 'active' : ''}>知识库</a></li>
+          <li><a href={`${BASE}demos/`} class={activeNav === 'demos' ? 'active' : ''}>可视化</a></li>
           <li><a href={`${BASE}reading/`} class={activeNav === 'reading' ? 'active' : ''}>读书</a></li>
           <li><a href="https://github.com/walterwang0x01/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
         </ul>
@@ -76,7 +77,8 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).toString() : undefined
         <li><a href={BASE} class={activeNav === 'blog' ? 'active' : ''}>博客</a></li>
         <li><a href={`${BASE}briefing/`} class={activeNav === 'briefing' ? 'active' : ''}>简报</a></li>
         <li><a href={`${BASE}notes/`} class={activeNav === 'notes' ? 'active' : ''}>知识库</a></li>
-        <li><a href={`${BASE}reading/`} class={activeNav === 'reading' ? 'active' : ''}>读书</a></li>
+        <li><a href={`${BASE}demos/`} class={activeNav === 'demos' ? 'active' : ''}>可视化</a></li>
+          <li><a href={`${BASE}reading/`} class={activeNav === 'reading' ? 'active' : ''}>读书</a></li>
         <li><a href="https://github.com/walterwang0x01/tech-learning-and-projects" target="_blank" rel="noopener">GitHub ↗</a></li>
       </ul>
     </nav>
