@@ -49,6 +49,15 @@
   /* ---------------- 工具 ---------------- */
 
   const prettify = (s) => s.replace(/\.md$/, '').replace(/^\d+[-.]?\s*/, '');
+
+  /** 该笔记是否内嵌了可视化 demo（从 AIDemos 注册表反查） */
+  function demoOf(file) {
+    if (!window.AIDemos) return null;
+    for (const t of window.AIDemos.types()) {
+      if (window.AIDemos.meta(t).note === file) return t;
+    }
+    return null;
+  }
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -151,9 +160,10 @@
             const done = state.progress.read[f] ? ' done' : '';
             const parts = f.split('/');
             const sub = parts.length > 2 ? prettify(parts[1]) + ' /' : '';
+            const hasDemo = demoOf(f) ? ' has-demo' : '';
             return `<li><a href="#read/${encodeURIComponent(f)}" class="file-link${done}" data-file="${esc(f)}">
               <span class="file-check">${state.progress.read[f] ? '✓' : '○'}</span>
-              <span><span class="file-sub">${esc(sub)}</span>${esc(prettify(parts[parts.length - 1]))}</span>
+              <span class="${hasDemo}"><span class="file-sub">${esc(sub)}</span>${esc(prettify(parts[parts.length - 1]))}</span>
             </a></li>`;
           }).join('');
           ul.dataset.filled = '1';
@@ -197,6 +207,7 @@
           a.textContent = prettify(f.split('/').pop());
           a.dataset.file = f;
           if (state.progress.read[f]) a.classList.add('done');
+          if (demoOf(f)) a.classList.add('has-demo');
           a.addEventListener('click', (e) => {
             e.preventDefault();
             loadNote(f);
@@ -221,13 +232,17 @@
     switchView('read');
     const content = $('#notesContent');
     content.innerHTML = '<div class="loading">加载中…</div>';
+    window.MdEnhance?.teardown();
     try {
       const resp = await fetch(state.base + file);
       if (!resp.ok) throw new Error(resp.statusText);
       const md = await resp.text();
       const html = window.marked ? window.marked.parse(md) : `<pre>${esc(md)}</pre>`;
       const quizItem = state.quiz?.items.find((it) => it.file === file);
+      const minutes = window.MdEnhance?.estimateMinutes(md) ?? 0;
+
       content.innerHTML = `
+        <div class="read-progress"><i id="readProgressBar"></i></div>
         <div class="note-actions">
           <button id="markReadBtn" class="btn-primary">
             ${state.progress.read[file] ? '✓ 已标记为读完' : '标记为读完'}
@@ -235,9 +250,25 @@
           ${quizItem ? `<button id="jumpQuizBtn" class="btn-ghost">去自测这篇（${quizItem.questions.length} 题）</button>` : ''}
           <a class="btn-ghost" target="_blank" rel="noopener"
              href="https://github.com/walterwang0x01/tech-learning-and-projects/blob/main/learning-notes/00-ai/${file.split('/').map(encodeURIComponent).join('/')}">在 GitHub 查看 ↗</a>
+          <span class="read-meta" id="readMeta">约 ${minutes} 分钟读完</span>
         </div>
-        <div class="note-md">${html}</div>`;
+        <div class="note-body">
+          <div class="note-md" id="noteMd">${html}</div>
+          <aside class="toc-float" id="tocFloat" hidden></aside>
+        </div>`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // markdown 增强：公式 / 代码高亮 / mermaid / TOC / 进度条
+      const mdRoot = $('#noteMd');
+      await window.MdEnhance?.enhance(mdRoot, {
+        md,
+        tocMount: $('#tocFloat'),
+        progressBar: $('#readProgressBar'),
+        progressMeta: $('#readMeta'),
+      });
+
+      // 内嵌可视化 demo（笔记里的 <!-- demo:xxx --> 标记）
+      mountInlineDemos(mdRoot);
 
       $('#markReadBtn')?.addEventListener('click', (e) => {
         markRead(file);
@@ -261,6 +292,57 @@
     } catch (err) {
       content.innerHTML = `<div class="error">加载失败：${esc(err.message)}</div>`;
     }
+  }
+
+  /**
+   * 处理笔记里的 <!-- demo:xxx --> 标记，替换成可折叠的交互演示
+   * marked 会把 HTML 注释原样输出到 DOM，用 TreeWalker 找出来
+   */
+  function mountInlineDemos(root) {
+    if (!window.AIDemos) return;
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+    const marks = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const m = (node.nodeValue || '').trim().match(/^demo:([a-z]+)$/);
+      if (m && window.AIDemos.has(m[1])) marks.push({ node, type: m[1] });
+    }
+
+    marks.forEach(({ node, type }, i) => {
+      const meta = window.AIDemos.meta(type);
+      const box = document.createElement('div');
+      box.className = 'inline-demo';
+      box.innerHTML = `
+        <button class="inline-demo-toggle" type="button">
+          <span class="idt-icon">🔬</span>
+          <span class="idt-text">展开交互演示：${escapeHtml(meta.title)}</span>
+          <span class="idt-caret">›</span>
+        </button>
+        <div class="inline-demo-body" hidden></div>`;
+      node.parentNode.replaceChild(box, node);
+
+      const btn = box.querySelector('.inline-demo-toggle');
+      const body = box.querySelector('.inline-demo-body');
+      let mounted = false;
+
+      btn.addEventListener('click', () => {
+        const willOpen = body.hidden;
+        body.hidden = !willOpen;
+        box.classList.toggle('open', willOpen);
+        btn.querySelector('.idt-text').textContent =
+          (willOpen ? '收起交互演示：' : '展开交互演示：') + meta.title;
+        if (willOpen && !mounted) {
+          window.AIDemos.mount(type, body, { compact: true, idPrefix: `inline-${type}-${i}` });
+          mounted = true;
+        }
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
   /* ---------------- 视图三：自测 ---------------- */

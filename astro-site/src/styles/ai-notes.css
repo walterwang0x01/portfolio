@@ -979,3 +979,246 @@ html[data-theme='dark'] .bp-table tr.warn td { color: #fbbf24; }
 }
 
 .loading, .error, .empty { text-align: center; color: var(--text-secondary); padding: 40px; }
+
+/* ==========================================================================
+   Markdown 阅读增强：进度条 / TOC / 代码块 / 公式 / Mermaid / 内嵌 demo
+   ========================================================================== */
+
+/* ---------- 阅读进度条 ---------- */
+.read-progress {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  z-index: 90;
+  pointer-events: none;
+}
+.read-progress > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--primary);
+  transition: width .1s linear;
+}
+.read-meta {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------- 正文 + 浮动 TOC 布局 ---------- */
+.note-body { display: flex; gap: 32px; align-items: flex-start; }
+.note-md { flex: 1; min-width: 0; }
+
+.toc-float {
+  width: 200px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 90px;
+  max-height: calc(100vh - 130px);
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+}
+.toc-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 6px;
+}
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.toc-list::-webkit-scrollbar { width: 4px; }
+.toc-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+.toc-item > a {
+  display: block;
+  padding: 4px 8px 4px 10px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  line-height: 1.5;
+  border-left: 2px solid transparent;
+  border-radius: 0 4px 4px 0;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.toc-item > a:hover { color: var(--text-primary); background: var(--bg-secondary); }
+.toc-item > a.active {
+  color: var(--primary);
+  border-left-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  font-weight: 500;
+}
+.toc-h3 > a { padding-left: 20px; font-size: 11.5px; opacity: .85; }
+
+@media (max-width: 1200px) {
+  .toc-float { display: none; }
+}
+
+/* ---------- 代码块 ---------- */
+.code-block {
+  position: relative;
+  margin: 18px 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--ai-radius-sm);
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 6px 13px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+.code-lang {
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text-secondary);
+  letter-spacing: .04em;
+}
+.code-copy {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.code-copy:hover { border-color: var(--primary); color: var(--primary); }
+.code-copy.copied { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.code-block > pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+.code-block > pre > code {
+  padding: 0;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+/* 无语言标记的块（ASCII 图表/流程图）不做高亮，保持等宽对齐 */
+.code-block > pre > code.no-highlight {
+  color: var(--text-primary);
+  white-space: pre;
+}
+
+/* ---------- KaTeX ---------- */
+.katex { font-size: 1.04em; }
+.katex-display {
+  margin: 18px 0;
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.katex-display > .katex { white-space: nowrap; }
+
+/* ---------- Mermaid ---------- */
+.mermaid-figure {
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--ai-radius-sm);
+  background: var(--card-bg);
+  text-align: center;
+  overflow-x: auto;
+}
+.mermaid-figure svg { max-width: 100%; height: auto; }
+
+/* ---------- 笔记内嵌 demo ---------- */
+.inline-demo {
+  margin: 22px 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--ai-radius);
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+.inline-demo.open { background: var(--card-bg); }
+.inline-demo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-family: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s;
+}
+.inline-demo-toggle:hover { background: var(--card-bg); }
+.idt-icon { font-size: 16px; line-height: 1; }
+.idt-text { flex: 1; }
+.idt-caret { color: var(--text-secondary); transition: transform .2s; }
+.inline-demo.open .idt-caret { transform: rotate(90deg); }
+.inline-demo-body {
+  padding: 4px 16px 18px;
+  border-top: 1px solid var(--border-color);
+}
+/* 内嵌场景收紧间距 */
+.inline-demo-body .demo-controls { padding: 14px; margin-top: 14px; }
+.inline-demo-body .demo-output { margin-bottom: 0; }
+
+/* ---------- demo 页的相关笔记卡片 ---------- */
+.demo-related {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 15px 18px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--ai-radius-sm);
+  background: var(--card-bg);
+  text-decoration: none;
+  transition: border-color .16s, transform .16s;
+}
+.demo-related:hover {
+  border-color: var(--primary);
+  transform: translateX(2px);
+}
+.dr-icon { font-size: 20px; line-height: 1; }
+.dr-main { flex: 1; min-width: 0; }
+.dr-main b { display: block; font-size: 13.5px; color: var(--text-primary); font-weight: 600; }
+.dr-main small { display: block; margin-top: 2px; font-size: 12px; color: var(--text-secondary); }
+.dr-arrow { color: var(--text-secondary); font-size: 15px; }
+.demo-related:hover .dr-arrow { color: var(--primary); }
+
+/* ---------- 路线图/目录树的「有可视化」标记 ---------- */
+.has-demo::after {
+  content: '🔬';
+  font-size: 10px;
+  margin-left: 5px;
+  opacity: .75;
+}
+
+@media (max-width: 900px) {
+  .read-progress { top: 56px; }
+  .read-meta { width: 100%; margin-left: 0; margin-top: 4px; }
+}
